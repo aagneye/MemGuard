@@ -31,12 +31,12 @@ def _keyword_conflict(existing_text: str, new_text: str) -> bool:
 
 
 def _vector_conflict(existing_text: str, new_text: str) -> bool:
-    """Vector cosine similarity conflict check using Qwen embeddings.
+    """Vector cosine similarity conflict check using cached Qwen embeddings.
     Returns False (not a candidate) when the embedding call is unavailable.
     """
     try:
-        from .llm_embed import cosine_similarity, embed_text
-        sim = cosine_similarity(embed_text(existing_text), embed_text(new_text))
+        from .service_embed_cache import cached_cosine_similarity
+        sim = cached_cosine_similarity(existing_text, new_text)
         return sim >= SIMILARITY_THRESHOLD and existing_text.lower() != new_text.lower()
     except Exception:
         return False
