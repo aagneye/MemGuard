@@ -7,6 +7,7 @@ import ChatPanel from "../../components/ChatPanel";
 import ErrorToast from "../../components/ErrorToast";
 import MemoryInspector from "../../components/MemoryInspector";
 import MemorySearchPanel from "../../components/MemorySearchPanel";
+import StatsPanel from "../../components/StatsPanel";
 import TopBar from "../../components/TopBar";
 import { fetchDemoUsers, fetchEvents, fetchMemories, resolveMemory, sendChatMessage, startNewSession } from "../../lib/api";
 import { FALLBACK_DEMO_USERS } from "../../lib/demoUsers";
@@ -94,6 +95,7 @@ export default function DemoPage() {
         onNewSession={handleNewSession}
         onResetDemo={() => { setMessages([]); void refreshMemories(activeUserId); }}
       />
+      <StatsPanel userId={activeUserId} />
       <div className="demo-body">
         <ChatPanel messages={messages} onSend={handleSend} />
         <div className="inspector-pane">
