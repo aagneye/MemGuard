@@ -114,6 +114,14 @@ class InMemoryStore:
         for item in items:
             item.status = "conflicted"
 
+    def link_conflict(self, first_id: str, second_id: str) -> None:
+        first = self.memories.get(first_id)
+        second = self.memories.get(second_id)
+        if first:
+            first.conflicts_with = second_id
+        if second:
+            second.conflicts_with = first_id
+
     def resolve(self, memory_id: str, action: str, supersede_fact_text: str | None = None) -> MemoryRecord | None:
         memory = self.memories.get(memory_id)
         if not memory:
