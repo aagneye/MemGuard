@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
     google_client_id: str = ""
     rate_limit_rpm: int = 60
+    demo_time_scale: float = 1.0
 
     model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8", extra="ignore")
 
