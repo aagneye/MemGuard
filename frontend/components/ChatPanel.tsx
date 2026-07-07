@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 
 import type { ChatMessage } from "../lib/types";
+import EmptyState from "./EmptyState";
 import MemoryEventTag from "./MemoryEventTag";
 import Spinner from "./Spinner";
 
@@ -32,9 +33,12 @@ export default function ChatPanel({ messages, onSend }: Props) {
     <section className="chat-panel">
       <div className="messages">
         {messages.length === 0 && (
-          <p className="muted">
-            Try: "I'm on the Pro plan, my timezone is IST, and please always reply concisely."
-          </p>
+          <EmptyState
+            icon="🧠"
+            title="No messages yet"
+            description="Talk to the agent — it will remember facts about you across sessions."
+            hint='Try: "I\'m on the Pro plan, my timezone is IST, please reply concisely."'
+          />
         )}
         {messages.map((msg, idx) => (
           <div key={idx} className={`msg ${msg.role === "user" ? "user" : "bot"}`}>
