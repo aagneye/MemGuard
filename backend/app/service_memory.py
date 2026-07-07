@@ -1,4 +1,5 @@
 from .domain_models import FactCandidate
+from .llm_adjudicate import adjudicate_conflict
 from .repository_events import EventRepository
 from .repository_memories import MemoryRepository
 from .service_conflict import has_conflict
@@ -14,7 +15,22 @@ class MemoryService:
     def process_candidate(self, user_id: str, candidate: FactCandidate) -> dict:
         active_memories = self.memories.active_for_user(user_id)
         trust_tier, ttl_days = score_trust(candidate.source_hint, candidate.confidence)
-        existing_conflict = next((m for m in active_memories if has_conflict(m, candidate.fact)), None)
+        # Stage 1: heuristic keyword similarity scan (fast)
+        candidate_conflicts = [m for m in active_memories if has_conflict(m, candidate.fact)]
+        # Stage 2: LLM adjudication on each candidate (precise)
+        existing_conflict = None
+        for mem in candidate_conflicts:
+            relation = adjudicate_conflict(mem.fact_text, candidate.fact)
+            if relation == "conflict":
+                existing_conflict = mem
+                break
+            if relation == "duplicate":
+                # Duplicate — touch last_confirmed_at instead of inserting
+                break
+        # Fall back to heuristic result if LLM returned unrelated for all
+        if existing_conflict is None and candidate_conflicts:
+            # LLM said "unrelated" for everything but heuristic fired — trust heuristic
+            existing_conflict = candidate_conflicts[0]
 
         if candidate.source_hint == "document_extracted" and is_sensitive_claim(candidate.fact):
             flagged = self.memories.create(
