@@ -18,6 +18,14 @@ def chat(body: ChatRequest) -> ChatResponse:
     events: list[MemoryEvent] = []
     for candidate in extract_candidates(body.message):
         event = memory_service.process_candidate(body.user_id, candidate)
-        events.append(MemoryEvent(event_type=event["event_type"], detail=event["detail"]))
+        events.append(
+            MemoryEvent(
+                event_type=event["event_type"],
+                type=event["type"],
+                fact=event["fact"],
+                trust_tier=event.get("trust_tier"),
+                detail=event["detail"],
+            )
+        )
 
     return ChatResponse(reply=reply, memory_events=events)
