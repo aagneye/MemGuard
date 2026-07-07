@@ -96,7 +96,8 @@ Or from repo root: `make test`
 
 | Doc | What it covers |
 |---|---|
-| [docs/SETUP.md](docs/SETUP.md) | Full setup: Docker, Qwen, Ollama, ECS deploy, OAuth, troubleshooting |
+| [docs/SETUP.md](docs/SETUP.md) | Full setup: Docker, Qwen, Ollama, troubleshooting |
+| [docs/PRODUCTION.md](docs/PRODUCTION.md) | **Deploy to production (Alibaba Cloud ECS)** |
 | [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md) | Beat-by-beat demo video script |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design and governance logic |
 | [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md) | Hackathon submission requirements |
@@ -125,7 +126,7 @@ MemGuard/
 docker compose -f infra/docker-compose.yml -f infra/docker-compose.prod.yml up -d --build
 ```
 
-Step-by-step ECS guide: [infra/alibaba-cloud/ecs-setup.md](infra/alibaba-cloud/ecs-setup.md)
+Step-by-step ECS guide: [docs/PRODUCTION.md](docs/PRODUCTION.md) · [infra/alibaba-cloud/ecs-setup.md](infra/alibaba-cloud/ecs-setup.md)
 
 ---
 
