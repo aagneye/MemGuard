@@ -19,6 +19,7 @@ from .routes_session_new import router as session_new_router
 from .routes_sessions import router as sessions_router
 from .routes_teams import router as teams_router
 from .routes_provenance import router as provenance_router
+from .routes_similar import router as similar_router
 from .routes_stats import router as stats_router
 from .routes_trust_explain import router as trust_explain_router
 
@@ -60,6 +61,7 @@ app.include_router(teams_router)
 app.include_router(trust_explain_router)
 app.include_router(provenance_router)
 app.include_router(stats_router)
+app.include_router(similar_router)
 
 register_exception_handlers(app)
 
