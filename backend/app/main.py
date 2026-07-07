@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .exception_handlers import register_exception_handlers
 from .logging_config import configure_logging
+from .startup import lifespan
 from .mcp_server import mcp_app
 from .middleware_logging import RequestLoggingMiddleware
 from .middleware_ratelimit import RateLimitMiddleware
@@ -28,6 +29,7 @@ configure_logging()
 app = FastAPI(
     title=settings.app_name,
     version="0.3.0",
+    lifespan=lifespan,
     description=(
         "MemGuard — Trust-Aware Memory Agent. "
         "Scores every memory for trust and provenance, catches conflicting or poisoned "
