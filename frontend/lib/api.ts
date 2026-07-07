@@ -41,6 +41,17 @@ export async function fetchMemories(userId: string): Promise<MemoryItem[]> {
   return (await res.json()) as MemoryItem[];
 }
 
+export async function fetchEvents(userId: string): Promise<import("./types").MemoryEvent[]> {
+  try {
+    const res = await fetch(`${API_BASE}/events?user_id=${encodeURIComponent(userId)}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : data.events ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export async function resolveMemory(
   memoryId: string,
   action: ResolveAction,
