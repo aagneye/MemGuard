@@ -3,7 +3,7 @@
 Maps Devpost's stated requirements directly to what will exist in this repo. Walk this top-to-bottom right before submitting.
 
 - [x] **Public GitHub repo with MIT license** — `LICENSE` file added at root; set repo visibility before submission.
-- [ ] **Working code + setup instructions** — `README.md` → `docs/SETUP.md` → `infra/docker-compose.yml`; a fresh clone + `.env` fill-in + `docker compose up` must work.
+- [ ] **Working code + setup instructions** — `README.md` (quickstart) → `docs/SETUP.md` (full guide) → `docker compose -f infra/docker-compose.yml up --build`; verify with `scripts/replay_demo_beats.py`.
 - [ ] **Alibaba Cloud deployment proof** — follow `infra/alibaba-cloud/ecs-setup.md`; record the video showing `docker compose ps` and `curl http://<ECS_IP>:8000/health`.
 - [ ] **Architecture diagram** — export Mermaid from `docs/ARCHITECTURE.md` and save as `docs/architecture-diagram.png`; embed in README.
 - [ ] **~3 minute demo video**, public on YouTube/Vimeo, covering all 5 beats. Run `python scripts/replay_demo_beats.py` first to confirm each beat works.
@@ -46,6 +46,21 @@ Maps Devpost's stated requirements directly to what will exist in this repo. Wal
 | Memory decay TTL tests | ✅ `tests/test_memory_decay.py` |
 | Shared conftest.py with store isolation | ✅ |
 | last_confirmed_at field + None-ttl support | ✅ |
+| Documentation index | ✅ `docs/README.md` |
+| Consolidated setup guide | ✅ `docs/SETUP.md` (root `setup.md` removed) |
+| Post-submission backlog | ✅ `docs/FUTURE_WORK.md` |
+
+---
+
+## Documentation map
+
+| Doc | Use when |
+|---|---|
+| [README.md](../README.md) | First clone — how to run locally |
+| [docs/SETUP.md](SETUP.md) | Full env config, Qwen, Docker, ECS, OAuth |
+| [docs/DEMO_GUIDE.md](DEMO_GUIDE.md) | Recording the demo video |
+| [docs/ARCHITECTURE.md](ARCHITECTURE.md) | Devpost description + technical depth |
+| [docs/FUTURE_WORK.md](FUTURE_WORK.md) | What to build after submission |
 
 ---
 
