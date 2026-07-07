@@ -126,11 +126,16 @@ class InMemoryStore:
         memory = self.memories.get(memory_id)
         if not memory:
             return None
+        counterpart = self.memories.get(memory.conflicts_with) if memory.conflicts_with else None
         if action == "accept":
             memory.status = "active"
+            if counterpart:
+                counterpart.status = "expired"
             return memory
         if action == "reject":
             memory.status = "expired"
+            if counterpart:
+                counterpart.status = "active"
             return memory
         if action == "supersede":
             new_memory = self.add(
