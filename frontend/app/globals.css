@@ -15,6 +15,63 @@ body {
   height: 100vh;
 }
 
+.dashboard-shell {
+  display: grid;
+  grid-template-columns: 260px 1.6fr 1fr;
+  height: 100vh;
+}
+
+.drawer {
+  padding: 16px;
+  border-right: 1px solid #1e293b;
+  background: #0b1220;
+}
+
+.small-list {
+  padding-left: 16px;
+  margin: 8px 0;
+}
+
+.small-list li {
+  margin-bottom: 6px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.landing {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.landing-card {
+  width: min(640px, 100%);
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 24px;
+  background: #111827;
+}
+
+.landing-card h1 {
+  margin-top: 0;
+}
+
+.landing-card ul {
+  padding-left: 18px;
+  color: #cbd5e1;
+}
+
+.muted {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.error-text {
+  color: #f87171;
+}
+
 .chat-panel,
 .memory-panel {
   padding: 16px;
