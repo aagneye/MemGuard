@@ -19,6 +19,22 @@ class SessionTurn(BaseModel):
     content: str
 
 
+class UserProfile(BaseModel):
+    id: str
+    email: str
+    name: str
+    picture: str | None = None
+
+
+class GoogleAuthRequest(BaseModel):
+    credential: str = Field(min_length=10)
+
+
+class AuthResponse(BaseModel):
+    token: str
+    user: UserProfile
+
+
 class ChatResponse(BaseModel):
     reply: str
     memory_events: list[MemoryEvent]
@@ -38,3 +54,33 @@ class MemoryItem(BaseModel):
     status: MemoryStatus
     ttl_days: int = 90
     superseded_by: str | None = None
+
+
+class TeamCreateRequest(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    owner_user_id: str
+
+
+class TeamInviteRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=320)
+    invited_by: str
+
+
+class TeamMemberAddRequest(BaseModel):
+    user_id: str
+
+
+class TeamInviteOut(BaseModel):
+    id: str
+    email: str
+    invited_by: str
+    status: str
+    created_at: str
+
+
+class TeamOut(BaseModel):
+    id: str
+    name: str
+    owner_user_id: str
+    members: list[str]
+    invites: list[TeamInviteOut]
