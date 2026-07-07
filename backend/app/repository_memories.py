@@ -35,3 +35,6 @@ class MemoryRepository:
 
     def mark_conflicted(self, records: list[MemoryRecord]) -> None:
         self.store.mark_conflicted(records)
+
+    def link_conflict(self, first_id: str, second_id: str) -> None:
+        self.store.link_conflict(first_id, second_id)
