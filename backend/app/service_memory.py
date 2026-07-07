@@ -45,6 +45,7 @@ class MemoryService:
                 ttl_days=ttl_days,
             )
             self.memories.mark_conflicted([existing_conflict, incoming])
+            self.memories.link_conflict(existing_conflict.id, incoming.id)
             detail = {"existing_id": existing_conflict.id, "incoming_id": incoming.id, "fact": candidate.fact}
             self.events.add(user_id, "conflict_detected", detail)
             return {
