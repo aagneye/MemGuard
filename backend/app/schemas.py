@@ -11,6 +11,9 @@ class ChatRequest(BaseModel):
 
 class MemoryEvent(BaseModel):
     event_type: str
+    type: str
+    fact: str
+    trust_tier: TrustTier | None = None
     detail: dict
 
 
