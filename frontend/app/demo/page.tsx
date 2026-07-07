@@ -6,6 +6,7 @@ import ActivityFeed from "../../components/ActivityFeed";
 import ChatPanel from "../../components/ChatPanel";
 import ErrorToast from "../../components/ErrorToast";
 import MemoryInspector from "../../components/MemoryInspector";
+import MemorySearchPanel from "../../components/MemorySearchPanel";
 import TopBar from "../../components/TopBar";
 import { fetchDemoUsers, fetchEvents, fetchMemories, resolveMemory, sendChatMessage, startNewSession } from "../../lib/api";
 import { FALLBACK_DEMO_USERS } from "../../lib/demoUsers";
@@ -97,6 +98,7 @@ export default function DemoPage() {
         <ChatPanel messages={messages} onSend={handleSend} />
         <div className="inspector-pane">
           <MemoryInspector memories={memories} onResolve={handleResolve} />
+          <MemorySearchPanel userId={activeUserId} />
           <ActivityFeed events={events} />
         </div>
       </div>
