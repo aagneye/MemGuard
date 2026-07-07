@@ -23,10 +23,42 @@ class MemoryRecord:
     superseded_by: str | None = None
 
 
+@dataclass
+class UserRecord:
+    id: str
+    email: str
+    name: str
+    picture: str | None = None
+
+
+@dataclass
+class TeamInvite:
+    id: str
+    team_id: str
+    email: str
+    invited_by: str
+    created_at: datetime = field(default_factory=utc_now)
+    status: str = "pending"
+
+
+@dataclass
+class TeamRecord:
+    id: str
+    name: str
+    owner_user_id: str
+    members: list[str] = field(default_factory=list)
+    invites: list[TeamInvite] = field(default_factory=list)
+    created_at: datetime = field(default_factory=utc_now)
+
+
 class InMemoryStore:
     def __init__(self) -> None:
         self.memories: dict[str, MemoryRecord] = {}
         self.events: dict[str, list[dict]] = {}
+        self.users: dict[str, UserRecord] = {}
+        self.user_by_email: dict[str, str] = {}
+        self.sessions: dict[str, str] = {}
+        self.teams: dict[str, TeamRecord] = {}
 
     def list_active(self, user_id: str) -> list[MemoryRecord]:
         self.expire_stale(user_id)
@@ -104,3 +136,50 @@ class InMemoryStore:
             memory.superseded_by = new_memory.id
             return new_memory
         return memory
+
+    def upsert_user(self, *, email: str, name: str, picture: str | None = None) -> UserRecord:
+        existing_id = self.user_by_email.get(email.lower())
+        if existing_id:
+            user = self.users[existing_id]
+            user.name = name
+            user.picture = picture
+            return user
+        user = UserRecord(id=str(uuid4()), email=email.lower(), name=name, picture=picture)
+        self.users[user.id] = user
+        self.user_by_email[user.email] = user.id
+        return user
+
+    def create_session(self, user_id: str) -> str:
+        token = str(uuid4())
+        self.sessions[token] = user_id
+        return token
+
+    def get_user_by_session(self, token: str) -> UserRecord | None:
+        user_id = self.sessions.get(token)
+        if not user_id:
+            return None
+        return self.users.get(user_id)
+
+    def create_team(self, *, name: str, owner_user_id: str) -> TeamRecord:
+        team = TeamRecord(id=str(uuid4()), name=name, owner_user_id=owner_user_id, members=[owner_user_id])
+        self.teams[team.id] = team
+        return team
+
+    def list_teams_for_user(self, user_id: str) -> list[TeamRecord]:
+        return [team for team in self.teams.values() if user_id in team.members or user_id == team.owner_user_id]
+
+    def invite_member(self, *, team_id: str, email: str, invited_by: str) -> TeamInvite | None:
+        team = self.teams.get(team_id)
+        if not team:
+            return None
+        invite = TeamInvite(id=str(uuid4()), team_id=team_id, email=email.lower(), invited_by=invited_by)
+        team.invites.append(invite)
+        return invite
+
+    def add_member(self, *, team_id: str, user_id: str) -> TeamRecord | None:
+        team = self.teams.get(team_id)
+        if not team:
+            return None
+        if user_id not in team.members:
+            team.members.append(user_id)
+        return team
