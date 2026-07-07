@@ -70,6 +70,8 @@ class MemoryItem(BaseModel):
     status: MemoryStatus
     ttl_days: int = 90
     superseded_by: str | None = None
+    conflicts_with: str | None = None
+    created_at: str
 
 
 class TeamCreateRequest(BaseModel):
