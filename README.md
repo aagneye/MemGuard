@@ -1,183 +1,131 @@
-# MemGuard — Trust-Aware Memory Agent
+# MemGuard
 
-> **Qwen Cloud Global AI Hackathon 2026 — Track 1: MemoryAgent**
+**Trust-Aware Memory Agent** — scores every memory for trust and provenance, detects conflicts and poisoning, and forgets stale facts. Built for the [Qwen Cloud Global AI Hackathon 2026](https://devpost.com) (Track 1: MemoryAgent).
 
-MemGuard is an open-source agent memory layer that **scores every memory for trust and provenance**, catches conflicting or poisoned facts before acting on them, and forgets what's gone stale — all powered by Qwen Cloud.
-
----
-
-## The Problem
-
-AI agents that remember things across sessions face a critical threat: **memory poisoning**. A malicious document, a crafted tool call, or a simple user mistake can silently overwrite a trusted fact with a false one. OWASP's Top 10 for Agentic Applications lists memory injection as a top-tier risk.
-
-Most memory systems are dumb key-value stores. MemGuard is different: every fact has a trust tier, a source, a TTL, and a lifecycle.
+MIT License · [Full docs](docs/README.md)
 
 ---
 
-## Architecture
+## Run locally
 
-```
-User Message
-    │
-    ▼
-┌─────────────────────────────────────────────────────────┐
-│  FastAPI Backend (MemGuard)                             │
-│                                                         │
-│  ① chat_reply()        — Qwen Chat LLM (qwen-plus)     │
-│  ② extract_facts()     — Qwen (JSON-only output)       │
-│  ③ adjudicate_conflict() — Qwen (stage 2 detection)    │
-│                                                         │
-│  Governance Module:                                     │
-│    • Trust Scorer   (user_stated=HIGH, doc=LOW)        │
-│    • Conflict Detector (keyword + vector Stage 1)       │
-│    • Poisoning Guard  (sensitive claim flagging)        │
-│    • Decay Scheduler  (TTL + demo_time_scale)          │
-│                                                         │
-│  MCP Tool Server: /mcp/tools/search_memory             │
-│                   /mcp/tools/write_memory              │
-└────────────────────┬────────────────────────────────────┘
-                     │
-              ┌──────▼──────┐
-              │ InMemoryStore│  ← dev (zero config)
-              └──────┬───────┘
-                     │ (migration path)
-              ┌──────▼───────┐
-              │ Postgres     │  ← prod (pgvector + Alembic)
-              │ + Redis      │
-              └──────────────┘
-```
-
----
-
-## Demo Screens
-
-| Screen | Route | Description |
-|---|---|---|
-| **Landing** | `/` | "What is MemGuard" + Launch Demo button |
-| **Chat + Inspector** | `/demo` | Chat panel + Memory Inspector + Governance Log |
-
----
-
-## The 5 Demo Beats
-
-1. **High-trust capture** — "I'm on the Pro plan, my timezone is IST." → three `HIGH · user_stated · active` memories.
-2. **Cross-session recall** — New session, ask "What's my plan?" → agent recalls without being told again.
-3. **Poisoning refusal** — Forward a document granting admin access → flagged with `🛡️` in the governance log.
-4. **Conflict resolution** — "Actually I'm on Enterprise now." → old/new cards appear, judge presses **Accept new**.
-5. **Decay** — Set `DEMO_TIME_SCALE=1440` to watch memories expire in real time.
-
----
-
-## Three Qwen LLM Calls Per Turn
-
-1. `chat_reply()` — chat turn response (qwen-plus)
-2. `extract_facts_via_llm()` — structured JSON fact extraction (qwen-plus, zero temperature)
-3. `adjudicate_conflict()` — Stage 2 conflict classification: agree/conflict/duplicate/unrelated (qwen-plus)
-
-Plus `embed_text()` — vector embeddings via `text-embedding-v3` for Stage 1 conflict scoring.
-
----
-
-## Quick Start (Local Dev — No API Key Required)
+### Option A — Docker (easiest)
 
 ```bash
 git clone https://github.com/aagneye/MemGuard.git
 cd MemGuard
 cp .env.example .env
-# Default: LLM_PROVIDER=ollama + qwen2.5:7b — run: ollama pull qwen2.5:7b
-
-# Start everything
-docker compose -f infra/docker-compose.yml up
-
-# Open the demo
-open http://localhost:3000
+docker compose -f infra/docker-compose.yml up --build
 ```
 
-## Quick Start (Qwen Cloud Production)
+Open **http://localhost:3000/demo** — no login required.
+
+### Option B — Manual (backend + frontend separately)
+
+**Terminal 1 — backend:**
 
 ```bash
-cp .env.example .env
-# Set: LLM_PROVIDER=qwen, QWEN_API_KEY=<your-dashscope-key>
-docker compose -f infra/docker-compose.yml -f infra/docker-compose.prod.yml up -d --build
+cd backend
+pip install -e ".[dev]"
+uvicorn app.main:app --reload --port 8000
 ```
 
----
+**Terminal 2 — frontend:**
 
-## API Surface
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-| Method | Path | Purpose |
+Open **http://localhost:3000/demo**.
+
+### LLM provider
+
+| Mode | `.env` setting | Requirement |
 |---|---|---|
-| POST | `/chat` | Send message, get reply + memory events |
-| GET | `/memories` | List all memories for a user |
-| GET | `/memories/search` | Semantic search over user's memories |
-| GET | `/memories/{id}` | Fetch single memory by ID |
-| POST | `/memories/{id}/resolve` | Accept / reject / supersede a conflicted memory |
-| POST | `/memories/{id}/touch` | Reset TTL countdown for a memory |
-| GET | `/events` | Governance log for a user |
-| POST | `/session/new` | Create a new session |
-| GET | `/demo/users` | List preset demo users |
-| POST | `/demo/reset` | Clear all demo memories for a fresh run |
-| GET | `/mcp/tools` | MCP tool discovery for Qwen agents |
-| POST | `/mcp/tools/search_memory` | MCP: search memories |
-| POST | `/mcp/tools/write_memory` | MCP: write a memory |
-| GET | `/health` | Health check |
-| GET | `/docs` | Interactive OpenAPI UI |
+| Local dev (free) | `LLM_PROVIDER=ollama` | [Ollama](https://ollama.com) + `ollama pull qwen2.5:7b` |
+| Production / demo video | `LLM_PROVIDER=qwen` | DashScope API key in `QWEN_API_KEY` |
+
+Copy `.env.example` to `.env` and fill in values. Full variable reference: [docs/SETUP.md](docs/SETUP.md).
 
 ---
 
-## Project Structure
+## Verify it works
 
-```
-MemGuard/
-├── backend/
-│   ├── app/
-│   │   ├── llm.py              # Qwen/Ollama client
-│   │   ├── llm_extract.py      # 2nd Qwen call — JSON fact extraction
-│   │   ├── llm_adjudicate.py   # 3rd Qwen call — conflict classification
-│   │   ├── llm_embed.py        # text-embedding-v3 calls
-│   │   ├── service_memory.py   # Core orchestration
-│   │   ├── service_conflict.py # Stage 1: keyword + vector
-│   │   ├── service_decay.py    # TTL with demo_time_scale
-│   │   ├── service_trust.py    # Trust tier scoring
-│   │   ├── service_poison.py   # Poisoning detection
-│   │   ├── mcp_server.py       # MCP tool server (mounted at /mcp)
-│   │   ├── db/models.py        # SQLAlchemy ORM (Postgres migration target)
-│   │   └── ...
-│   ├── alembic/                # Database migrations
-│   └── tests/                  # pytest test suite (15 test files)
-├── frontend/
-│   ├── components/
-│   │   ├── ChatPanel.tsx
-│   │   ├── MemoryInspector.tsx # Trust badges, decay badges, conflict cards
-│   │   ├── ActivityFeed.tsx    # Governance log
-│   │   ├── TopBar.tsx
-│   │   └── ...
-│   └── app/
-│       ├── page.tsx            # Landing
-│       └── demo/page.tsx       # Main demo screen
-├── infra/
-│   ├── docker-compose.yml      # Postgres + Redis + backend + frontend
-│   ├── docker-compose.prod.yml # Production override
-│   ├── nginx/memguard.conf     # Reverse proxy
-│   └── alibaba-cloud/          # ECS + RDS deployment guides
-├── scripts/
-│   ├── seed_demo_data.py       # Pre-load demo users
-│   └── replay_demo_beats.py    # Verify 5 beats pass
-└── docs/
-    ├── ARCHITECTURE.md
-    ├── DEMO_GUIDE.md           # Beat-by-beat demo script
-    └── SUBMISSION_CHECKLIST.md
+```bash
+# Health
+curl http://localhost:8000/health
+
+# Seed demo data and run all 5 beats
+pip install httpx
+python scripts/seed_demo_data.py
+python scripts/replay_demo_beats.py
 ```
 
 ---
 
-## Running Tests
+## What you'll see
+
+| URL | Screen |
+|---|---|
+| http://localhost:3000 | Landing page |
+| http://localhost:3000/demo | Chat + Memory Inspector + Governance Log |
+| http://localhost:8000/docs | API documentation |
+
+Pick **Alice** from the demo user dropdown and try:
+
+> I'm on the Pro plan, my timezone is IST, and please always reply concisely.
+
+Memories appear in the inspector with trust tiers. Click **New Session** and ask "What's my plan?" to see cross-session recall.
+
+---
+
+## Run tests
 
 ```bash
 cd backend
 pip install -e ".[dev]"
 pytest tests/ -v
 ```
+
+Or from repo root: `make test`
+
+---
+
+## Documentation
+
+| Doc | What it covers |
+|---|---|
+| [docs/SETUP.md](docs/SETUP.md) | Full setup: Docker, Qwen, Ollama, ECS deploy, OAuth, troubleshooting |
+| [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md) | Beat-by-beat demo video script |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design and governance logic |
+| [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md) | Hackathon submission requirements |
+| [docs/FUTURE_WORK.md](docs/FUTURE_WORK.md) | Post-submission development backlog |
+| [docs/README.md](docs/README.md) | Index of all documentation |
+
+---
+
+## Project layout
+
+```
+MemGuard/
+├── backend/          FastAPI + governance module + MCP server
+├── frontend/         Next.js demo UI
+├── infra/            Docker Compose, Nginx, Alibaba Cloud guides
+├── scripts/          Seed data, demo replay, health check
+└── docs/             Architecture, setup, demo guide
+```
+
+---
+
+## Deploy to production
+
+```bash
+# Set LLM_PROVIDER=qwen and QWEN_API_KEY in .env first
+docker compose -f infra/docker-compose.yml -f infra/docker-compose.prod.yml up -d --build
+```
+
+Step-by-step ECS guide: [infra/alibaba-cloud/ecs-setup.md](infra/alibaba-cloud/ecs-setup.md)
 
 ---
 
