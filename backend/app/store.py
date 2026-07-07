@@ -21,6 +21,7 @@ class MemoryRecord:
     ttl_days: int = 90
     created_at: datetime = field(default_factory=utc_now)
     superseded_by: str | None = None
+    conflicts_with: str | None = None
 
 
 @dataclass
