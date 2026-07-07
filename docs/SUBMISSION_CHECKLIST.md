@@ -2,18 +2,56 @@
 
 Maps Devpost's stated requirements directly to what will exist in this repo. Walk this top-to-bottom right before submitting.
 
-- [ ] **Public GitHub repo** with an OSS license (MIT recommended) visible in the "About" section — set repo visibility and add `LICENSE` on day 1, don't leave it private during the build.
-- [ ] **Working code + setup instructions** — `README.md` links to `docs/SETUP.md`; a fresh clone + `.env` fill-in + the commands in `SETUP.md` §4 must actually work.
-- [ ] **Alibaba Cloud deployment proof** — short recording, separate from the demo video, showing the backend running on the ECS instance (public IP reachable + `docker ps`/`curl` on the box). Linked in the submission to `infra/alibaba-cloud/ecs-setup.md` (or `docker-compose.prod.yml` / RDS setup, secrets redacted).
-- [ ] **Architecture diagram** — `docs/architecture-diagram.png`, exported from the mermaid source in `docs/ARCHITECTURE.md`, embedded in the README.
-- [ ] **~3 minute demo video**, public on YouTube/Vimeo/Facebook, covering all 5 beats from `ARCHITECTURE.md` §3: high-trust capture → cross-session recall → poisoning refusal → conflict detection & resolve → decay.
-- [ ] **Text description** of features/functionality — pulled from the pitch + demo scenario sections of `ARCHITECTURE.md`, adapted for the Devpost submission form.
+- [x] **Public GitHub repo with MIT license** — `LICENSE` file added at root; set repo visibility before submission.
+- [ ] **Working code + setup instructions** — `README.md` → `docs/SETUP.md` → `infra/docker-compose.yml`; a fresh clone + `.env` fill-in + `docker compose up` must work.
+- [ ] **Alibaba Cloud deployment proof** — follow `infra/alibaba-cloud/ecs-setup.md`; record the video showing `docker compose ps` and `curl http://<ECS_IP>:8000/health`.
+- [ ] **Architecture diagram** — export Mermaid from `docs/ARCHITECTURE.md` and save as `docs/architecture-diagram.png`; embed in README.
+- [ ] **~3 minute demo video**, public on YouTube/Vimeo, covering all 5 beats. Run `python scripts/replay_demo_beats.py` first to confirm each beat works.
+- [ ] **Text description** on Devpost form — copy the pitch + problem statement from `docs/ARCHITECTURE.md §1`.
 - [ ] **Track declared**: Track 1 — MemoryAgent.
-- [ ] **(Optional) Blog/social post** about the build journey, for the Blog Post Prize eligibility.
+- [ ] **(Optional) Blog/social post** about the build journey.
 
-## Judging-criteria self-check (do this before recording, not after)
+---
 
-- [ ] **Technical Depth (30%)** — can I point to, on screen: the dual LLM provider switch, the two-stage conflict detector, and (if built) the MCP tool server?
-- [ ] **Innovation (30%)** — does the Memory Inspector visibly show trust tiers, provenance, and the supersede-not-overwrite lifecycle, not just a plain chat log?
-- [ ] **Problem Value (25%)** — does the video explicitly say the words "memory poisoning" and tie it back to a real, named, current threat (OWASP Top 10 for Agentic Applications), not just "we prevent bad data"?
-- [ ] **Presentation (15%)** — is the Activity Feed / governance logic actually visible and narrated during the demo, or is it hidden behind a static chat UI?
+## Build progress (auto-updated)
+
+| Area | Status |
+|---|---|
+| MIT LICENSE | ✅ |
+| pytest.ini + tests/__init__.py | ✅ |
+| LLM fact extraction (2nd Qwen call) | ✅ `backend/app/llm_extract.py` |
+| LLM conflict adjudication (3rd Qwen call) | ✅ `backend/app/llm_adjudicate.py` |
+| Two-stage conflict detector in service_memory | ✅ |
+| Structured JSON logging | ✅ `backend/app/logging_config.py` |
+| Request correlation middleware | ✅ `backend/app/middleware_logging.py` |
+| Rate limiter middleware | ✅ `backend/app/middleware_ratelimit.py` |
+| Health endpoint enriched | ✅ `GET /health` returns version + provider |
+| OpenAPI metadata + license + contact | ✅ `main.py` |
+| docker-compose with Postgres (pgvector) + Redis | ✅ `infra/docker-compose.yml` |
+| docker-compose.prod.yml override | ✅ `infra/docker-compose.prod.yml` |
+| Backend Dockerfile HEALTHCHECK | ✅ |
+| Backend + Frontend .dockerignore | ✅ |
+| Nginx reverse proxy config | ✅ `infra/nginx/memguard.conf` |
+| Alibaba Cloud ECS setup guide | ✅ `infra/alibaba-cloud/ecs-setup.md` |
+| Demo seed data script | ✅ `scripts/seed_demo_data.py` |
+| 5-beat demo replay verifier | ✅ `scripts/replay_demo_beats.py` |
+| MCP tool server (search + write) | ✅ `backend/app/mcp_server.py` mounted at `/mcp` |
+| Frontend Spinner component | ✅ |
+| Frontend ErrorToast component | ✅ |
+| Next.js layout metadata (OG, Twitter card) | ✅ |
+| Custom 404 page | ✅ |
+| next.config.js API proxy rewrite | ✅ |
+| Backend integration test suite | ✅ `tests/test_chat_pipeline.py` |
+| LLM extraction fallback tests | ✅ `tests/test_llm_extract_fallback.py` |
+| Memory decay TTL tests | ✅ `tests/test_memory_decay.py` |
+| Shared conftest.py with store isolation | ✅ |
+| last_confirmed_at field + None-ttl support | ✅ |
+
+---
+
+## Judging-criteria self-check
+
+- [ ] **Technical Depth (30%)** — point to: `llm_extract.py` (2nd call), `llm_adjudicate.py` (3rd call), `mcp_server.py` (MCP integration), dual LLM provider switch in `llm.py`.
+- [ ] **Innovation (30%)** — Memory Inspector shows trust tiers, provenance, supersede lifecycle, and conflict resolution side-by-side with chat.
+- [ ] **Problem Value (25%)** — demo video explicitly says "memory poisoning", "OWASP Top 10 for Agentic Applications", and `flagged_poisoning` event is visible on screen.
+- [ ] **Presentation (15%)** — activity feed (`/events`) visible and narrated, governance logic on screen, not just a plain chat log.
