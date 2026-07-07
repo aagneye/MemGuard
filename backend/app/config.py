@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     rate_limit_rpm: int = 60
     demo_time_scale: float = 1.0
+    database_url: str = "sqlite+aiosqlite:///./memguard.db"
+    redis_url: str = "redis://localhost:6379/0"
 
     model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8", extra="ignore")
 
