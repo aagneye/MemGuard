@@ -22,6 +22,14 @@ class SessionTurn(BaseModel):
     content: str
 
 
+class NewSessionRequest(BaseModel):
+    user_id: str
+
+
+class NewSessionResponse(BaseModel):
+    session_id: str
+
+
 class UserProfile(BaseModel):
     id: str
     email: str
