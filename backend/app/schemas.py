@@ -1,41 +1,41 @@
-from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
 
 
 TrustTier = Literal["high", "medium", "low"]
-MemorySource = Literal["user_stated", "tool_inferred", "document_extracted"]
+SourceType = Literal["user_stated", "tool_inferred", "document_extracted"]
 MemoryStatus = Literal["active", "conflicted", "expired", "superseded"]
+ResolveAction = Literal["accept", "reject", "supersede"]
 
 
 class ChatRequest(BaseModel):
     user_id: str
     session_id: str
-    message: str = Field(min_length=1)
+    message: str = Field(min_length=1, max_length=4000)
 
 
-class MemoryEventOut(BaseModel):
+class MemoryEvent(BaseModel):
     event_type: str
     detail: dict
 
 
 class ChatResponse(BaseModel):
     reply: str
-    memory_events: list[MemoryEventOut]
+    memory_events: list[MemoryEvent]
 
 
-class MemoryOut(BaseModel):
+class ResolveRequest(BaseModel):
+    action: ResolveAction
+    supersede_fact_text: str | None = None
+
+
+class MemoryItem(BaseModel):
     id: str
     user_id: str
     fact_text: str
     trust_tier: TrustTier
-    source: MemorySource
+    source: SourceType
     status: MemoryStatus
-    ttl_days: int
-    created_at: datetime
-
-
-class ResolveRequest(BaseModel):
-    action: Literal["accept", "reject", "supersede"]
-    superseded_by_fact: str | None = None
+    ttl_days: int = 90
+    superseded_by: str | None = None
