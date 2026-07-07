@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import ChatPanel from "../../components/ChatPanel";
+import ErrorToast from "../../components/ErrorToast";
 import MemoryInspector from "../../components/MemoryInspector";
 import TopBar from "../../components/TopBar";
 import { fetchDemoUsers, fetchMemories, resolveMemory, sendChatMessage, startNewSession } from "../../lib/api";
@@ -15,41 +16,67 @@ export default function DemoPage() {
   const [sessionId, setSessionId] = useState("session_1");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [memories, setMemories] = useState<MemoryItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    void fetchDemoUsers().then((users) => {
-      if (users.length > 0) {
-        setDemoUsers(users);
-        setActiveUserId(users[0].id);
-      }
-    });
+    void fetchDemoUsers()
+      .then((users) => {
+        if (users.length > 0) {
+          setDemoUsers(users);
+          setActiveUserId(users[0].id);
+        }
+      })
+      .catch(() => {
+        // Backend may not be running — fallback users already set
+      });
+  }, []);
+
+  const refreshMemories = useCallback(async (userId: string) => {
+    try {
+      setMemories(await fetchMemories(userId));
+    } catch {
+      // Memory panel shows stale data; non-fatal
+    }
   }, []);
 
   useEffect(() => {
     void refreshMemories(activeUserId);
     setMessages([]);
-  }, [activeUserId]);
-
-  async function refreshMemories(userId: string) {
-    setMemories(await fetchMemories(userId));
-  }
+  }, [activeUserId, refreshMemories]);
 
   async function handleSend(text: string) {
     setMessages((prev) => [...prev, { role: "user", content: text }]);
-    const payload = await sendChatMessage(activeUserId, sessionId, text);
-    setMessages((prev) => [...prev, { role: "assistant", content: payload.reply, events: payload.memory_events }]);
-    await refreshMemories(activeUserId);
+    try {
+      const payload = await sendChatMessage(activeUserId, sessionId, text);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: payload.reply, events: payload.memory_events },
+      ]);
+      await refreshMemories(activeUserId);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Backend unreachable — is the server running?";
+      setError(msg);
+      setMessages((prev) => prev.slice(0, -1));
+    }
   }
 
   async function handleNewSession() {
-    const nextSessionId = await startNewSession(activeUserId);
-    setSessionId(nextSessionId);
-    setMessages([]);
+    try {
+      const nextSessionId = await startNewSession(activeUserId);
+      setSessionId(nextSessionId);
+      setMessages([]);
+    } catch {
+      setError("Could not create a new session.");
+    }
   }
 
   async function handleResolve(memoryId: string, action: ResolveAction) {
-    await resolveMemory(memoryId, action);
-    await refreshMemories(activeUserId);
+    try {
+      await resolveMemory(memoryId, action);
+      await refreshMemories(activeUserId);
+    } catch {
+      setError("Failed to resolve memory conflict.");
+    }
   }
 
   return (
@@ -64,6 +91,7 @@ export default function DemoPage() {
         <ChatPanel messages={messages} onSend={handleSend} />
         <MemoryInspector memories={memories} onResolve={handleResolve} />
       </div>
+      <ErrorToast message={error} onDismiss={() => setError(null)} />
     </main>
   );
 }
