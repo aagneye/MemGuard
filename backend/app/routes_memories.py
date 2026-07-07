@@ -21,6 +21,8 @@ def list_memories(user_id: str = Query(...), status: str | None = None) -> list[
             status=r.status,
             ttl_days=r.ttl_days,
             superseded_by=r.superseded_by,
+            conflicts_with=r.conflicts_with,
+            created_at=r.created_at.isoformat(),
         )
         for r in records
     ]
