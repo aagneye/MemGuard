@@ -4,6 +4,8 @@ Thank you for your interest in MemGuard! Contributions are welcome.
 
 ## Development Setup
 
+See [docs/SETUP.md](docs/SETUP.md) for the full guide. Quick path:
+
 ```bash
 bash scripts/setup.sh
 ```
