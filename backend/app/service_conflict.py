@@ -1,16 +1,53 @@
+"""Conflict detection — Stage 1 of the two-stage pipeline.
+
+Stage 1 (this module): fast candidate selection using:
+  a) keyword heuristic (no LLM cost, runs always)
+  b) vector cosine similarity via Qwen text-embedding-v3 (when LLM available)
+      A similarity score >= SIMILARITY_THRESHOLD marks a candidate.
+
+Stage 2: see llm_adjudicate.py — the LLM decides the final relation type.
+"""
+from __future__ import annotations
+
 from .store import MemoryRecord
+
+SIMILARITY_THRESHOLD = 0.85
+
+
+def _keyword_conflict(existing_text: str, new_text: str) -> bool:
+    """Fast heuristic: same-domain keywords differ → candidate conflict."""
+    e, n = existing_text.lower(), new_text.lower()
+    for keys in (
+        ("plan", "pro", "enterprise", "starter", "free"),
+        ("timezone", "ist", "utc", "pst", "est", "gmt"),
+        ("always reply", "response style", "concise", "verbose"),
+        ("refund", "admin access"),
+    ):
+        in_existing = any(k in e for k in keys)
+        in_new = any(k in n for k in keys)
+        if in_existing and in_new and e != n:
+            return True
+    return False
+
+
+def _vector_conflict(existing_text: str, new_text: str) -> bool:
+    """Vector cosine similarity conflict check using Qwen embeddings.
+    Returns False (not a candidate) when the embedding call is unavailable.
+    """
+    try:
+        from .llm_embed import cosine_similarity, embed_text
+        sim = cosine_similarity(embed_text(existing_text), embed_text(new_text))
+        return sim >= SIMILARITY_THRESHOLD and existing_text.lower() != new_text.lower()
+    except Exception:
+        return False
 
 
 def has_conflict(existing: MemoryRecord, new_fact: str) -> bool:
-    existing_lower = existing.fact_text.lower()
-    new_lower = new_fact.lower()
+    """Return True if the new fact is a conflict candidate for the existing memory.
 
-    plan_keys = ("plan", "pro", "enterprise")
-    if any(k in existing_lower for k in plan_keys) and any(k in new_lower for k in plan_keys):
-        return existing_lower != new_lower
-
-    tz_keys = ("timezone", "ist", "utc", "pst")
-    if any(k in existing_lower for k in tz_keys) and any(k in new_lower for k in tz_keys):
-        return existing_lower != new_lower
-
-    return False
+    Uses keyword heuristic first. If it fires, returns immediately (cheap).
+    If not, tries vector similarity (more expensive, requires LLM).
+    """
+    if _keyword_conflict(existing.fact_text, new_fact):
+        return True
+    return _vector_conflict(existing.fact_text, new_fact)
