@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 
 import type { ChatMessage } from "../lib/types";
 import MemoryEventTag from "./MemoryEventTag";
+import Spinner from "./Spinner";
 
 type Props = {
   messages: ChatMessage[];
@@ -41,16 +42,21 @@ export default function ChatPanel({ messages, onSend }: Props) {
             {msg.events?.map((event, eventIdx) => <MemoryEventTag key={eventIdx} event={event} />)}
           </div>
         ))}
+        {sending && (
+          <div className="msg bot">
+            <Spinner size="sm" label="MemGuard is thinking…" />
+          </div>
+        )}
       </div>
       <form onSubmit={handleSubmit} className="row">
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="Type a message..."
+          placeholder="Type a message…"
           disabled={sending}
         />
         <button type="submit" disabled={sending}>
-          {sending ? "Sending..." : "Send"}
+          {sending ? <Spinner size="sm" /> : "Send"}
         </button>
       </form>
     </section>
