@@ -33,8 +33,17 @@ export default function MemoryInspector({ memories, onResolve }: Props) {
 
   return (
     <aside className="memory-panel">
-      <h3>Memory Inspector</h3>
-      <p className="muted">Live view of this user&apos;s stored memories — trust tier, source, and status.</p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <h3 style={{ margin: 0 }}>Memory Inspector</h3>
+        <span
+          className="badge"
+          style={{ background: "#1e293b", color: "#94a3b8", fontSize: "11px" }}
+          title={`${memories.length} total memories`}
+        >
+          {memories.filter(m => m.status === "active").length} active / {memories.length} total
+        </span>
+      </div>
+      <p className="muted" style={{ marginTop: "4px" }}>Live view — trust tier, source, and status.</p>
 
       {conflictPairs.map((pair) => (
         <div className="memory-card conflict-card" key={pair.oldMemory.id}>
