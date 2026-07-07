@@ -18,8 +18,9 @@ class MemoryRecord:
     trust_tier: str
     source: str
     status: str = "active"
-    ttl_days: int = 90
+    ttl_days: int | None = 90
     created_at: datetime = field(default_factory=utc_now)
+    last_confirmed_at: datetime = field(default_factory=utc_now)
     superseded_by: str | None = None
     conflicts_with: str | None = None
 
@@ -107,8 +108,36 @@ class InMemoryStore:
         for memory in self.memories.values():
             if memory.user_id != user_id or memory.status != "active":
                 continue
-            if memory.created_at + timedelta(days=memory.ttl_days) < now:
+            if memory.ttl_days is None:
+                continue
+            anchor = memory.last_confirmed_at or memory.created_at
+            if anchor + timedelta(days=memory.ttl_days) < now:
                 memory.status = "expired"
+
+    def add_memory(
+        self,
+        user_id: str,
+        fact_text: str,
+        trust_tier: str,
+        source: str,
+        *,
+        ttl_days: int | None = 90,
+        status: str = "active",
+    ) -> str:
+        """Convenience method used by tests and scripts; returns the new memory ID."""
+        mem = self.add(
+            user_id=user_id,
+            fact_text=fact_text,
+            trust_tier=trust_tier,
+            source=source,
+            status=status,
+            ttl_days=ttl_days,
+        )
+        return mem.id
+
+    def active_memories_for(self, user_id: str) -> list[MemoryRecord]:
+        """Alias for list_active used by tests."""
+        return self.list_active(user_id)
 
     def mark_conflicted(self, items: Iterable[MemoryRecord]) -> None:
         for item in items:
