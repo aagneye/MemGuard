@@ -27,7 +27,13 @@ class MemoryService:
             )
             detail = {"memory_id": flagged.id, "reason": "possible_poisoning", "fact": candidate.fact}
             self.events.add(user_id, "flagged_poisoning", detail)
-            return {"event_type": "flagged_poisoning", "detail": detail}
+            return {
+                "event_type": "flagged_poisoning",
+                "type": "flagged",
+                "fact": candidate.fact,
+                "trust_tier": "low",
+                "detail": detail,
+            }
 
         if existing_conflict:
             incoming = self.memories.create(
@@ -41,7 +47,13 @@ class MemoryService:
             self.memories.mark_conflicted([existing_conflict, incoming])
             detail = {"existing_id": existing_conflict.id, "incoming_id": incoming.id, "fact": candidate.fact}
             self.events.add(user_id, "conflict_detected", detail)
-            return {"event_type": "conflict_detected", "detail": detail}
+            return {
+                "event_type": "conflict_detected",
+                "type": "conflict",
+                "fact": candidate.fact,
+                "trust_tier": trust_tier,
+                "detail": detail,
+            }
 
         saved = self.memories.create(
             user_id=user_id,
@@ -53,4 +65,10 @@ class MemoryService:
         )
         detail = {"memory_id": saved.id, "trust_tier": trust_tier, "source": candidate.source_hint}
         self.events.add(user_id, "stored", detail)
-        return {"event_type": "stored", "detail": detail}
+        return {
+            "event_type": "stored",
+            "type": "stored",
+            "fact": candidate.fact,
+            "trust_tier": trust_tier,
+            "detail": detail,
+        }
