@@ -157,3 +157,18 @@ button {
 .tag.low {
   color: #ef4444;
 }
+
+.launch-button {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: #38bdf8;
+  color: #0b1220;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.launch-button:hover {
+  background: #0ea5e9;
+}
