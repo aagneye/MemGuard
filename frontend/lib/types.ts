@@ -27,6 +27,7 @@ export type MemoryItem = {
   superseded_by: string | null;
   conflicts_with: string | null;
   created_at: string;
+  days_remaining: number | null;
 };
 
 export type ChatResponse = {
