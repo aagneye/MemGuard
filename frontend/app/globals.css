@@ -1,0 +1,102 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, Arial, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  height: 100vh;
+}
+
+.chat-panel,
+.memory-panel {
+  padding: 16px;
+}
+
+.chat-panel {
+  border-right: 1px solid #1e293b;
+}
+
+.messages {
+  height: 72vh;
+  overflow: auto;
+  background: #111827;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.msg {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #1f2937;
+}
+
+.msg.user {
+  border-left: 3px solid #38bdf8;
+}
+
+.msg.bot {
+  border-left: 3px solid #22c55e;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+input,
+select,
+button {
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background: #0b1220;
+  color: #e2e8f0;
+  padding: 10px;
+}
+
+input {
+  flex: 1;
+}
+
+button {
+  cursor: pointer;
+}
+
+.memory-card {
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #111827;
+}
+
+.tag {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid #334155;
+}
+
+.tag.high {
+  color: #22c55e;
+}
+
+.tag.medium {
+  color: #facc15;
+}
+
+.tag.low {
+  color: #ef4444;
+}
