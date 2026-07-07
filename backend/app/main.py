@@ -10,6 +10,7 @@ from .middleware_ratelimit import RateLimitMiddleware
 from .routes_auth import router as auth_router
 from .routes_chat import router as chat_router
 from .routes_demo import router as demo_router
+from .routes_demo_state import router as demo_state_router
 from .routes_events import router as events_router
 from .routes_health import router as health_router
 from .routes_memories import router as memories_router
@@ -47,6 +48,7 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(auth_router)
 app.include_router(demo_router)
+app.include_router(demo_state_router)
 app.include_router(chat_router)
 app.include_router(memories_router)
 app.include_router(memories_search_router)
