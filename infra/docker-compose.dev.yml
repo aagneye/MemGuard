@@ -1,0 +1,26 @@
+version: "3.9"
+
+# Development-only services.
+# Use this alongside docker-compose.yml when you want only the databases
+# and run backend/frontend locally (faster reload, debugging):
+#
+#   docker compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml up postgres redis
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  backend:
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
+    environment:
+      LOG_LEVEL: DEBUG
+      DEMO_TIME_SCALE: "1.0"
+
+  frontend:
+    environment:
+      NEXT_PUBLIC_API_BASE: http://localhost:8000
