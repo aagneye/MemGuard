@@ -1,7 +1,7 @@
 [project]
 name = "memguard-backend"
-version = "0.1.0"
-description = "MemGuard FastAPI backend"
+version = "0.3.0"
+description = "MemGuard FastAPI backend — Trust-Aware Memory Agent"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -10,9 +10,26 @@ dependencies = [
   "pydantic>=2.8.0",
   "pydantic-settings>=2.3.0",
   "openai>=1.40.0",
-  "pytest>=8.2.0",
   "google-auth>=2.33.0",
+  "httpx>=0.27.0",
 ]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2.0",
+  "pytest-asyncio>=0.23.0",
+  "httpx>=0.27.0",
+  "ruff>=0.5.0",
+  "pyright>=1.1.370",
+]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I", "UP"]
+
+[tool.pyright]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
