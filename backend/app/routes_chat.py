@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from .llm import chat_reply
+from .llm_extract import extract_facts_via_llm
 from .schemas import ChatRequest, ChatResponse, MemoryEvent
 from .service_extract import extract_candidates
 from .state import memory_repo, memory_service, session_repo
@@ -16,7 +17,8 @@ def chat(body: ChatRequest) -> ChatResponse:
     session_repo.append_turn(body.session_id, "assistant", reply)
 
     events: list[MemoryEvent] = []
-    for candidate in extract_candidates(body.message):
+    candidates = extract_facts_via_llm(body.message) or extract_candidates(body.message)
+    for candidate in candidates:
         event = memory_service.process_candidate(body.user_id, candidate)
         events.append(
             MemoryEvent(
