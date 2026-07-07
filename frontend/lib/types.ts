@@ -25,6 +25,8 @@ export type MemoryItem = {
   status: MemoryStatus;
   ttl_days: number;
   superseded_by: string | null;
+  conflicts_with: string | null;
+  created_at: string;
 };
 
 export type ChatResponse = {
