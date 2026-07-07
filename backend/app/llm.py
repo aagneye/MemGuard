@@ -7,9 +7,11 @@ from .config import settings
 
 def _client() -> OpenAI | None:
     if settings.llm_provider == "qwen":
-        if not settings.dashscope_api_key:
+        api_key = settings.qwen_api_key or settings.dashscope_api_key
+        base_url = settings.qwen_base_url or settings.dashscope_base_url
+        if not api_key:
             return None
-        return OpenAI(api_key=settings.dashscope_api_key, base_url=settings.dashscope_base_url)
+        return OpenAI(api_key=api_key, base_url=base_url)
     return OpenAI(api_key="ollama", base_url=settings.ollama_base_url)
 
 
