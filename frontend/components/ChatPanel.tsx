@@ -37,7 +37,7 @@ export default function ChatPanel({ messages, onSend }: Props) {
             icon="🧠"
             title="No messages yet"
             description="Talk to the agent — it will remember facts about you across sessions."
-            hint='Try: "I\'m on the Pro plan, my timezone is IST, please reply concisely."'
+            hint={'Try: "I\'m on the Pro plan, my timezone is IST, please reply concisely."'}
           />
         )}
         {messages.map((msg, idx) => (
