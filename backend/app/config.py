@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     session_ttl_seconds: int = 1800
     cors_origins: str = "http://localhost:3000"
     google_client_id: str = ""
+    rate_limit_rpm: int = 60
 
     model_config = SettingsConfigDict(env_file="../.env", env_file_encoding="utf-8", extra="ignore")
 
