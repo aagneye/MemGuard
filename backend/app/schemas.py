@@ -68,10 +68,11 @@ class MemoryItem(BaseModel):
     trust_tier: TrustTier
     source: SourceType
     status: MemoryStatus
-    ttl_days: int = 90
+    ttl_days: int | None = 90
     superseded_by: str | None = None
     conflicts_with: str | None = None
     created_at: str
+    days_remaining: float | None = None
 
 
 class TeamCreateRequest(BaseModel):
