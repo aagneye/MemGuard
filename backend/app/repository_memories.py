@@ -38,3 +38,10 @@ class MemoryRepository:
 
     def link_conflict(self, first_id: str, second_id: str) -> None:
         self.store.link_conflict(first_id, second_id)
+
+    def get(self, memory_id: str) -> MemoryRecord | None:
+        return self.store.get(memory_id)
+
+    @property
+    def _store(self) -> InMemoryStore:
+        return self.store
