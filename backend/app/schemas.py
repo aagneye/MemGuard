@@ -30,6 +30,11 @@ class NewSessionResponse(BaseModel):
     session_id: str
 
 
+class DemoUser(BaseModel):
+    id: str
+    label: str
+
+
 class UserProfile(BaseModel):
     id: str
     email: str
