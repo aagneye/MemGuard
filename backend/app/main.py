@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
+from .exception_handlers import register_exception_handlers
 from .logging_config import configure_logging
 from .mcp_server import mcp_app
 from .middleware_logging import RequestLoggingMiddleware
@@ -53,6 +54,8 @@ app.include_router(sessions_router)
 app.include_router(session_new_router)
 app.include_router(teams_router)
 app.include_router(trust_explain_router)
+
+register_exception_handlers(app)
 
 # MCP tool server mounted at /mcp — discoverable by Qwen Cloud agents
 app.mount("/mcp", mcp_app)
