@@ -226,3 +226,22 @@ button {
   background: rgba(239, 68, 68, 0.15);
   color: #f87171;
 }
+
+.conflict-card {
+  border-color: #f59e0b;
+}
+
+.conflict-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.conflict-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #f59e0b;
+  font-weight: 700;
+}
