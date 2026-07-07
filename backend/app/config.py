@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     ollama_model: str = "qwen2.5:7b"
     dashscope_base_url: str = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
     dashscope_api_key: str = ""
+    qwen_api_key: str = ""
+    qwen_base_url: str = ""
     qwen_chat_model: str = "qwen-plus"
     similarity_threshold: float = 0.8
     session_ttl_seconds: int = 1800
