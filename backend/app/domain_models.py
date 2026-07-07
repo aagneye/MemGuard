@@ -1,11 +1,11 @@
-from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+"""Internal domain models — not part of the API schema.
 
-from .domain_types import MemoryStatus, SourceType, TrustTier
+These dataclasses represent intermediate states used during processing
+within the governance pipeline (extract → trust → conflict → persist).
+"""
+from dataclasses import dataclass
 
-
-def utc_now() -> datetime:
-    return datetime.now(tz=timezone.utc)
+from .domain_types import SourceType
 
 
 @dataclass
@@ -17,23 +17,23 @@ class FactCandidate:
 
 @dataclass
 class MemoryEventRecord:
+    user_id: str
     event_type: str
     detail: dict
-    created_at: datetime
-
-    def to_dict(self) -> dict:
-        payload = asdict(self)
-        payload["created_at"] = self.created_at.isoformat()
-        return payload
 
 
 @dataclass
 class MemoryView:
     id: str
-    user_id: str
     fact_text: str
-    trust_tier: TrustTier
-    source: SourceType
-    status: MemoryStatus
-    ttl_days: int
-    superseded_by: str | None
+    trust_tier: str
+    source: str
+    status: str
+
+
+@dataclass
+class ResolveResult:
+    memory_id: str
+    new_status: str
+    counterpart_id: str | None = None
+    counterpart_new_status: str | None = None
