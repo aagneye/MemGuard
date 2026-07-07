@@ -16,6 +16,7 @@ from .routes_memories_search import router as memories_search_router
 from .routes_session_new import router as session_new_router
 from .routes_sessions import router as sessions_router
 from .routes_teams import router as teams_router
+from .routes_trust_explain import router as trust_explain_router
 
 configure_logging()
 
@@ -51,6 +52,7 @@ app.include_router(events_router)
 app.include_router(sessions_router)
 app.include_router(session_new_router)
 app.include_router(teams_router)
+app.include_router(trust_explain_router)
 
 # MCP tool server mounted at /mcp — discoverable by Qwen Cloud agents
 app.mount("/mcp", mcp_app)
