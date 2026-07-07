@@ -88,8 +88,10 @@ export default function DemoPage() {
       <TopBar
         demoUsers={demoUsers}
         activeUserId={activeUserId}
+        sessionId={sessionId}
         onSwitchUser={setActiveUserId}
         onNewSession={handleNewSession}
+        onResetDemo={() => { setMessages([]); void refreshMemories(activeUserId); }}
       />
       <div className="demo-body">
         <ChatPanel messages={messages} onSend={handleSend} />
