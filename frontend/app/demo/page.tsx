@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import ActivityFeed from "../../components/ActivityFeed";
 import ChatPanel from "../../components/ChatPanel";
 import ErrorToast from "../../components/ErrorToast";
 import MemoryInspector from "../../components/MemoryInspector";
 import TopBar from "../../components/TopBar";
-import { fetchDemoUsers, fetchMemories, resolveMemory, sendChatMessage, startNewSession } from "../../lib/api";
+import { fetchDemoUsers, fetchEvents, fetchMemories, resolveMemory, sendChatMessage, startNewSession } from "../../lib/api";
 import { FALLBACK_DEMO_USERS } from "../../lib/demoUsers";
-import type { ChatMessage, DemoUser, MemoryItem, ResolveAction } from "../../lib/types";
+import type { ChatMessage, DemoUser, MemoryEvent, MemoryItem, ResolveAction } from "../../lib/types";
 
 export default function DemoPage() {
   const [demoUsers, setDemoUsers] = useState<DemoUser[]>(FALLBACK_DEMO_USERS);
@@ -16,6 +17,7 @@ export default function DemoPage() {
   const [sessionId, setSessionId] = useState("session_1");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [memories, setMemories] = useState<MemoryItem[]>([]);
+  const [events, setEvents] = useState<MemoryEvent[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -33,7 +35,9 @@ export default function DemoPage() {
 
   const refreshMemories = useCallback(async (userId: string) => {
     try {
-      setMemories(await fetchMemories(userId));
+      const [mems, evts] = await Promise.all([fetchMemories(userId), fetchEvents(userId)]);
+      setMemories(mems);
+      setEvents(evts);
     } catch {
       // Memory panel shows stale data; non-fatal
     }
@@ -89,7 +93,10 @@ export default function DemoPage() {
       />
       <div className="demo-body">
         <ChatPanel messages={messages} onSend={handleSend} />
-        <MemoryInspector memories={memories} onResolve={handleResolve} />
+        <div className="inspector-pane">
+          <MemoryInspector memories={memories} onResolve={handleResolve} />
+          <ActivityFeed events={events} />
+        </div>
       </div>
       <ErrorToast message={error} onDismiss={() => setError(null)} />
     </main>
