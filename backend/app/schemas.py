@@ -1,12 +1,6 @@
-from typing import Literal
-
 from pydantic import BaseModel, Field
 
-
-TrustTier = Literal["high", "medium", "low"]
-SourceType = Literal["user_stated", "tool_inferred", "document_extracted"]
-MemoryStatus = Literal["active", "conflicted", "expired", "superseded"]
-ResolveAction = Literal["accept", "reject", "supersede"]
+from .domain_types import MemoryStatus, ResolveAction, SourceType, TrustTier
 
 
 class ChatRequest(BaseModel):
@@ -18,6 +12,11 @@ class ChatRequest(BaseModel):
 class MemoryEvent(BaseModel):
     event_type: str
     detail: dict
+
+
+class SessionTurn(BaseModel):
+    role: str
+    content: str
 
 
 class ChatResponse(BaseModel):
