@@ -34,3 +34,20 @@ export async function startNewSession(userId: string): Promise<string> {
   const res = await postJson<{ session_id: string }>("/session/new", { user_id: userId });
   return res.session_id;
 }
+
+export async function fetchMemories(userId: string): Promise<MemoryItem[]> {
+  const res = await fetch(`${API_BASE}/memories?user_id=${encodeURIComponent(userId)}`);
+  if (!res.ok) return [];
+  return (await res.json()) as MemoryItem[];
+}
+
+export async function resolveMemory(
+  memoryId: string,
+  action: ResolveAction,
+  supersedeFactText?: string
+): Promise<{ ok: boolean; memory_id: string; status: string }> {
+  return postJson(`/memories/${memoryId}/resolve`, {
+    action,
+    supersede_fact_text: supersedeFactText,
+  });
+}
