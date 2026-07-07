@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
+from .logging_config import configure_logging
+from .middleware_logging import RequestLoggingMiddleware
+from .middleware_ratelimit import RateLimitMiddleware
 from .routes_auth import router as auth_router
 from .routes_chat import router as chat_router
 from .routes_demo import router as demo_router
@@ -12,7 +15,22 @@ from .routes_session_new import router as session_new_router
 from .routes_sessions import router as sessions_router
 from .routes_teams import router as teams_router
 
-app = FastAPI(title=settings.app_name, version="0.2.0")
+configure_logging()
+
+app = FastAPI(
+    title=settings.app_name,
+    version="0.3.0",
+    description=(
+        "MemGuard — Trust-Aware Memory Agent. "
+        "Scores every memory for trust and provenance, catches conflicting or poisoned "
+        "facts before acting on them, and forgets what's gone stale."
+    ),
+    license_info={"name": "MIT", "url": "https://opensource.org/licenses/MIT"},
+    contact={"name": "MemGuard", "url": "https://github.com/aagneye/MemGuard"},
+)
+
+app.add_middleware(RateLimitMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[item.strip() for item in settings.cors_origins.split(",") if item.strip()],
@@ -20,6 +38,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 app.include_router(health_router)
 app.include_router(auth_router)
 app.include_router(demo_router)
