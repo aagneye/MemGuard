@@ -1,11 +1,31 @@
-"""Preset demo users for the public MemGuard demo.
+"""Preset demo users for the public hackathon demo.
 
-These exist so judges/visitors can reset the whole demo cleanly by switching
-users, without wiping real data or needing any login.
+These users are pre-seeded by scripts/seed_demo_data.py to demonstrate
+each of the 5 demo beats without requiring a real user account.
 """
+from typing import TypedDict
 
-DEMO_USERS: list[dict[str, str]] = [
-    {"id": "demo_alice", "label": "Alice (Pro plan, IST)"},
-    {"id": "demo_bob", "label": "Bob (fresh, no memories yet)"},
-    {"id": "demo_carol", "label": "Carol (poisoning scenario seed)"},
+
+class DemoUserDict(TypedDict):
+    id: str
+    label: str
+    description: str
+
+
+DEMO_USERS: list[DemoUserDict] = [
+    {
+        "id": "demo_alice",
+        "label": "Alice (Support Tier Demo)",
+        "description": "Primary demo user — has Pro plan, IST timezone, concise preference pre-loaded.",
+    },
+    {
+        "id": "demo_bob",
+        "label": "Bob (Fresh User)",
+        "description": "Clean slate — no memories. Use to demonstrate first-session capture.",
+    },
+    {
+        "id": "demo_carol",
+        "label": "Carol (Poisoning Demo)",
+        "description": "Has a pre-loaded poisoning attempt from a forwarded email document.",
+    },
 ]
