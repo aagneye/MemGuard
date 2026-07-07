@@ -246,6 +246,17 @@ button {
   font-weight: 700;
 }
 
+.trust-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #1e293b;
+}
+
 /* ── Spinner ─────────────────────────────────────────────────────── */
 .spinner-wrapper {
   display: inline-flex;
