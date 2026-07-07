@@ -32,6 +32,27 @@ def list_memories(user_id: str = Query(...), status: str | None = None) -> list[
     ]
 
 
+@router.get("/memories/{memory_id}", response_model=MemoryItem)
+def get_memory(memory_id: str) -> MemoryItem:
+    """Fetch a single memory by ID."""
+    record = memory_repo.get(memory_id)
+    if not record:
+        raise HTTPException(status_code=404, detail="Memory not found")
+    return MemoryItem(
+        id=record.id,
+        user_id=record.user_id,
+        fact_text=record.fact_text,
+        trust_tier=record.trust_tier,
+        source=record.source,
+        status=record.status,
+        ttl_days=record.ttl_days,
+        superseded_by=record.superseded_by,
+        conflicts_with=record.conflicts_with,
+        created_at=record.created_at.isoformat(),
+        days_remaining=days_remaining(record.last_confirmed_at, record.ttl_days),
+    )
+
+
 @router.post("/memories/{memory_id}/touch")
 def touch_memory(memory_id: str) -> dict:
     """Reset last_confirmed_at to now — defers TTL expiry. Useful for the decay demo beat."""
