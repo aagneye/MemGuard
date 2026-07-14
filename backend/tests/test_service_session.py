@@ -3,12 +3,11 @@ import pytest
 
 from app.service_session import MAX_SESSION_TURNS, build_chat_history
 from app.repository_sessions import SessionRepository
-from app.store import InMemoryStore
 
 
 @pytest.fixture
 def session_repo():
-    return SessionRepository(InMemoryStore())
+    return SessionRepository()
 
 
 class TestBuildChatHistory:
