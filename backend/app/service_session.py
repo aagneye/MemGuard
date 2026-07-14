@@ -35,9 +35,9 @@ def build_chat_history(
     )
     messages: list[dict] = [{"role": "system", "content": system_content}]
 
-    recent_turns = session_repo.get(session_id)[-MAX_SESSION_TURNS:]
+    recent_turns = session_repo.get_turns(session_id, limit=MAX_SESSION_TURNS)
     for turn in recent_turns:
-        messages.append({"role": turn.role, "content": turn.content})
+        messages.append({"role": turn["role"], "content": turn["content"]})
 
     messages.append({"role": "user", "content": new_user_message})
     return messages
