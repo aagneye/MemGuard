@@ -28,7 +28,6 @@ def _chat_with_history(messages: list[dict]) -> str:
 
 @router.post("/chat", response_model=ChatResponse)
 def chat(body: ChatRequest) -> ChatResponse:
-    session_repo.append_turn(body.session_id, "user", body.message)
     active_memories = memory_repo.active_for_user(body.user_id)
 
     messages = build_chat_history(
@@ -39,6 +38,7 @@ def chat(body: ChatRequest) -> ChatResponse:
         new_user_message=body.message,
     )
     reply = _chat_with_history(messages)
+    session_repo.append_turn(body.session_id, "user", body.message)
     session_repo.append_turn(body.session_id, "assistant", reply)
 
     events: list[MemoryEvent] = []
