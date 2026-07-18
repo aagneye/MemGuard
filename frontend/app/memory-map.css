@@ -1,0 +1,70 @@
+.mem-map__svg {
+  width: 100%;
+  height: auto;
+  min-height: 280px;
+  background: var(--cream-deep);
+  border-radius: 14px;
+}
+
+.mem-map__edge {
+  stroke: var(--line-strong);
+  stroke-width: 0.4;
+}
+
+.mem-map__edge--conflict {
+  stroke: var(--maroon);
+  stroke-dasharray: 1.2 1;
+}
+
+.mem-map__node {
+  fill: var(--cream-card);
+  stroke-width: 0.7;
+}
+
+.mem-map__node--high {
+  stroke: var(--ink);
+}
+
+.mem-map__node--med {
+  stroke: var(--ink-muted);
+}
+
+.mem-map__node--low {
+  stroke: var(--maroon);
+  fill: var(--maroon-soft);
+}
+
+.mem-map__label {
+  fill: var(--ink-soft);
+  font-size: 3.2px;
+  font-family: var(--font-mono);
+}
+
+.mem-map__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+}
+
+.mem-map__swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+  border: 2px solid var(--ink);
+}
+
+.mem-map__swatch--med {
+  border-color: var(--ink-muted);
+}
+
+.mem-map__swatch--low {
+  border-color: var(--maroon);
+  background: var(--maroon-soft);
+}
