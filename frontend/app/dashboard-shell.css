@@ -1,0 +1,121 @@
+.dash-shell {
+  min-height: 100vh;
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.dash-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: calc(100vh - var(--nav-height));
+}
+
+@media (min-width: 960px) {
+  .dash-body {
+    grid-template-columns: 260px 1fr;
+  }
+}
+
+.dash-main {
+  padding: 24px clamp(16px, 3vw, 32px) 40px;
+  min-width: 0;
+}
+
+.dash-menu-btn {
+  display: inline-flex;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 960px) {
+  .dash-menu-btn {
+    display: none;
+  }
+}
+
+.dash-drawer-backdrop {
+  display: none;
+}
+
+.dash-drawer {
+  background: var(--cream-card);
+  border-right: 1px solid var(--line);
+  padding: 20px 14px;
+}
+
+.dash-drawer__label {
+  margin: 0 12px 12px;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 700;
+}
+
+.dash-drawer__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.dash-drawer__item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  padding: 12px 12px;
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+}
+
+.dash-drawer__item:hover {
+  background: var(--cream-deep);
+}
+
+.dash-drawer__item.is-active {
+  background: var(--maroon-soft);
+}
+
+.dash-drawer__item.is-active .dash-drawer__item-label {
+  color: var(--maroon);
+}
+
+.dash-drawer__item-label {
+  font-weight: 650;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.dash-drawer__item-hint {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+@media (max-width: 959px) {
+  .dash-drawer-backdrop.is-open {
+    display: block;
+    position: fixed;
+    inset: var(--nav-height) 0 0;
+    background: rgba(17, 17, 11, 0.35);
+    z-index: 30;
+  }
+
+  .dash-drawer {
+    position: fixed;
+    top: var(--nav-height);
+    left: 0;
+    bottom: 0;
+    width: min(300px, 86vw);
+    z-index: 31;
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .dash-drawer.is-open {
+    transform: translateX(0);
+  }
+}
