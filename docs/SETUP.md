@@ -83,13 +83,34 @@ Without Ollama running, chat returns a fallback (“could not reach the model”
 
 **Terminal 1 — backend**
 
+Linux / macOS:
+
 ```bash
 cd backend
-python -m pip install fastapi "uvicorn[standard]" pydantic pydantic-settings openai httpx google-auth pytest
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+python3 -m pip install fastapi "uvicorn[standard]" pydantic pydantic-settings openai httpx google-auth pytest
+python3 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-On Windows, if `python` / `pip` are not on PATH, use the full path to your Python install.
+Windows (PowerShell) — do **not** use bare `python` if you see *“Python was not found… Microsoft Store”*. That is the Store alias, not a real install. Use your installed `python.exe` (3.10+):
+
+```powershell
+cd backend
+$py = "$env:LOCALAPPDATA\Programs\Python\Python312\python.exe"
+# If 3.12 is missing, try Python310 instead:
+# $py = "$env:LOCALAPPDATA\Programs\Python\Python310\python.exe"
+& $py -m pip install fastapi "uvicorn[standard]" pydantic pydantic-settings openai httpx google-auth pytest
+& $py -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Find your install if the path differs:
+
+```powershell
+Get-ChildItem "$env:LOCALAPPDATA\Programs\Python" -Recurse -Filter python.exe |
+  Where-Object { $_.FullName -notmatch '\\Lib\\venv\\' } |
+  Select-Object -ExpandProperty FullName
+```
+
+Optional fix so `python` works in new terminals: add that folder to PATH, or turn off **Settings → Apps → Advanced app settings → App execution aliases →** `python.exe` / `python3.exe`.
 
 **Terminal 2 — frontend**
 
@@ -132,12 +153,12 @@ curl -X POST http://localhost:8000/chat \
   -d "{\"user_id\":\"demo_alice\",\"session_id\":\"s1\",\"message\":\"I am on the Pro plan, my timezone is IST\"}"
 ```
 
-Optional full 5-beat check:
+Optional full 5-beat check (same `$py` as above on Windows):
 
 ```bash
-pip install httpx
-python scripts/seed_demo_data.py --base-url http://localhost:8000
-python scripts/replay_demo_beats.py --base-url http://localhost:8000
+python3 -m pip install httpx
+python3 scripts/seed_demo_data.py --base-url http://localhost:8000
+python3 scripts/replay_demo_beats.py --base-url http://localhost:8000
 ```
 
 ---
@@ -164,7 +185,7 @@ Not required for the public `/demo`. Optional steps remain under the dashboard r
 
 | Symptom | Fix |
 |---|---|
-| `pip` / `python` not found (Windows) | Use full path to `python.exe`, or add Python to PATH |
+| `Python was not found… Microsoft Store` | Store alias stole `python`. Use full path to `Python312\python.exe` (see Step 3), or disable App execution aliases |
 | Chat: “could not reach the model” | Start `ollama serve`; match `OLLAMA_MODEL` to `ollama list` |
 | Ollama `404` on `/v1/chat/completions` | Wrong/missing model name in `.env` |
 | Frontend cannot reach API | `NEXT_PUBLIC_API_BASE=http://localhost:8000` |
