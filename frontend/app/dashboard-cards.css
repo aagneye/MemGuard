@@ -1,0 +1,49 @@
+.dash-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+.dash-card h2,
+.dash-card h3 {
+  margin-top: 0;
+}
+
+.dash-grid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 800px) {
+  .dash-grid--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .dash-grid--2 {
+    grid-template-columns: 1.2fr 0.8fr;
+  }
+}
+
+.dash-stat {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  margin: 0;
+  color: var(--maroon);
+}
+
+.dash-view-title {
+  margin: 0 0 6px;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+}
+
+.dash-view-lede {
+  margin: 0 0 22px;
+  color: var(--ink-muted);
+}
+
+.dash-mono {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
