@@ -5,7 +5,7 @@ Maps Devpost's stated requirements directly to what will exist in this repo. Wal
 - [x] **Public GitHub repo with MIT license** — `LICENSE` file added at root; set repo visibility before submission.
 - [ ] **Working code + setup instructions** — `README.md` (quickstart) → `docs/SETUP.md` (full guide) → `docker compose -f infra/docker-compose.yml up --build`; verify with `scripts/replay_demo_beats.py`.
 - [ ] **Alibaba Cloud deployment proof** — follow `infra/alibaba-cloud/ecs-setup.md`; record the video showing `docker compose ps` and `curl http://<ECS_IP>:8000/health`.
-- [ ] **Architecture diagram** — export Mermaid from `docs/ARCHITECTURE.md` and save as `docs/architecture-diagram.png`; embed in README.
+- [x] **Architecture diagram** — [`docs/architecture-diagram.png`](architecture-diagram.png) embedded in root [`README.md`](../README.md); code-mapped write-up in [`ARCHITECTURE_DIAGRAM.md`](ARCHITECTURE_DIAGRAM.md); Mermaid sources `architecture-diagram.mmd` + `architecture-diagram-overview.mmd`.
 - [ ] **~3 minute demo video**, public on YouTube/Vimeo, covering all 5 beats. Run `python scripts/replay_demo_beats.py` first to confirm each beat works.
 - [ ] **Text description** on Devpost form — copy the pitch + problem statement from `docs/ARCHITECTURE.md §1`.
 - [ ] **Track declared**: Track 1 — MemoryAgent.
