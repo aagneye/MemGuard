@@ -1,0 +1,32 @@
+%%{init: {'theme': 'neutral', 'flowchart': {'htmlLabels': true}}}%%
+flowchart LR
+    subgraph Client["1. Frontend"]
+        UI["Next.js Demo UI<br/>Chat · Memory Inspector<br/>Governance Log"]
+    end
+
+    subgraph Cloud["2. Backend — Alibaba Cloud ECS"]
+        API["FastAPI<br/>POST /chat · /memories · /events"]
+        GOV["Governance<br/>Trust · Poison · Conflict · Decay"]
+        MCP["MCP Tools<br/>/mcp search + write"]
+    end
+
+    subgraph Persist["3. Data"]
+        MEM["Long-term memory<br/>InMemoryStore now<br/>Postgres+pgvector ready"]
+        SESS["Session turns<br/>SessionRepository"]
+    end
+
+    subgraph Models["4. LLM"]
+        QWEN["Qwen Cloud DashScope<br/>chat · extract · adjudicate · embed"]
+        OLLAMA["Ollama Qwen<br/>local dev only"]
+    end
+
+    UI <-->|"JSON over HTTP"| API
+    API --> GOV
+    API --> MCP
+    GOV --> MEM
+    API --> SESS
+    API -->|"Call 1: chat reply"| QWEN
+    API -->|"Call 2: JSON fact extract"| QWEN
+    GOV -->|"Call 3: conflict adjudicate"| QWEN
+    GOV -->|"embeddings text-embedding-v3"| QWEN
+    API -.->|"LLM_PROVIDER=ollama"| OLLAMA
