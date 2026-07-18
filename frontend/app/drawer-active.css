@@ -1,0 +1,4 @@
+.dash-drawer__item.is-active .dash-drawer__item-hint {
+  color: var(--maroon);
+  opacity: 0.85;
+}
