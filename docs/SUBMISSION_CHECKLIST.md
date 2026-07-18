@@ -2,7 +2,7 @@
 
 Maps Devpost's stated requirements directly to what will exist in this repo. Walk this top-to-bottom right before submitting.
 
-- [x] **Public GitHub repo with MIT license** — `LICENSE` file added at root; set repo visibility before submission.
+- [x] **Public GitHub repo with MIT license** — root [`LICENSE`](../LICENSE) (MIT, GitHub-detectable). **You must set the GitHub repo to Public** (Settings → General → Danger Zone → Change visibility) so the license appears in the repository **About** section.
 - [ ] **Working code + setup instructions** — `README.md` (quickstart) → `docs/SETUP.md` (full guide) → `docker compose -f infra/docker-compose.yml up --build`; verify with `scripts/replay_demo_beats.py`.
 - [ ] **Alibaba Cloud deployment proof** — follow `infra/alibaba-cloud/ecs-setup.md`; record the video showing `docker compose ps` and `curl http://<ECS_IP>:8000/health`.
 - [x] **Architecture diagram** — [`docs/architecture-diagram.png`](architecture-diagram.png) embedded in root [`README.md`](../README.md); code-mapped write-up in [`ARCHITECTURE_DIAGRAM.md`](ARCHITECTURE_DIAGRAM.md); Mermaid sources `architecture-diagram.mmd` + `architecture-diagram-overview.mmd`.
