@@ -3,6 +3,7 @@ name = "memguard-backend"
 version = "0.3.0"
 description = "MemGuard FastAPI backend — Trust-Aware Memory Agent"
 readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115.0",
