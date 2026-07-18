@@ -1,0 +1,121 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#e2e8f0', 'primaryTextColor': '#0f172a', 'primaryBorderColor': '#334155', 'lineColor': '#475569', 'secondaryColor': '#f1f5f9', 'tertiaryColor': '#cbd5e1', 'fontFamily': 'Inter, Segoe UI, sans-serif'}}}%%
+flowchart TB
+    %% ── Client ────────────────────────────────────────────────────────────
+    subgraph FE["Frontend — Next.js 14 (port 3000)"]
+        direction TB
+        LAND["/ Landing page"]
+        DEMO["/demo Demo shell"]
+        TOP["TopBar\nNew Session · Switch Demo User · Reset"]
+        CHAT["ChatPanel\n+ MemoryEventTag"]
+        INSP["MemoryInspector\ntrust / source / status · Accept/Keep"]
+        FEED["ActivityFeed\nGovernance Log"]
+        SEARCH["MemorySearchPanel"]
+        APIJS["lib/api.ts\nNEXT_PUBLIC_API_BASE"]
+        DEMO --> TOP
+        DEMO --> CHAT
+        DEMO --> INSP
+        DEMO --> FEED
+        DEMO --> SEARCH
+        TOP --> APIJS
+        CHAT --> APIJS
+        INSP --> APIJS
+        FEED --> APIJS
+        SEARCH --> APIJS
+    end
+
+    %% ── Edge ──────────────────────────────────────────────────────────────
+    subgraph EDGE["Optional edge — production"]
+        NGX["Nginx reverse proxy\ninfra/nginx/memguard.conf\n/ → frontend · /api → backend"]
+    end
+
+    %% ── Backend ───────────────────────────────────────────────────────────
+    subgraph BE["Backend — FastAPI on Alibaba Cloud ECS (port 8000)"]
+        direction TB
+        MW["Middleware\nCORS · RateLimit · RequestLogging"]
+        MAIN["app/main.py\nrouters + /mcp mount"]
+
+        subgraph API["HTTP API surface"]
+            RCHAT["POST /chat"]
+            RMEM["GET/POST /memories*\nlist · resolve · touch · search · similar · provenance · batch"]
+            REVT["GET /events"]
+            RSESS["POST /session/new\nGET/DELETE /sessions/*"]
+            RDEMO["GET /demo/users · POST /demo/reset"]
+            RMCP["/mcp/tools\nsearch_memory · write_memory"]
+            RHEALTH["GET /health · /stats · /trust/explain"]
+        end
+
+        subgraph ORCH["Turn orchestration — routes_chat.py"]
+            HIST["service_session.build_chat_history\nsession turns + active memories"]
+            REPLY["LLM call #1 — chat reply\n_chat_with_history"]
+            EXTRACT["LLM call #2 — fact extraction\nllm_extract.extract_facts_via_llm\nfallback: service_extract heuristics"]
+            PROC["MemoryService.process_candidate"]
+        end
+
+        subgraph GOV["Governance module"]
+            TRUST["service_trust.score_trust\nuser_stated→HIGH · tool→MED · doc→LOW"]
+            POISON["service_poison.is_sensitive_claim\nflagged_poisoning"]
+            CONF1["Stage 1 conflict\nservice_conflict + llm_embed\nkeyword + vector cosine"]
+            CONF2["Stage 2 conflict\nllm_adjudicate\nagree|conflict|duplicate|unrelated"]
+            DECAY["service_decay\nTTL + DEMO_TIME_SCALE\ncheck-on-read expire"]
+        end
+
+        MW --> MAIN
+        MAIN --> API
+        RCHAT --> HIST --> REPLY
+        RCHAT --> EXTRACT --> PROC
+        PROC --> TRUST
+        PROC --> POISON
+        PROC --> CONF1 --> CONF2
+        RMEM --> DECAY
+    end
+
+    %% ── Data ──────────────────────────────────────────────────────────────
+    subgraph DATA["Data layer"]
+        direction TB
+        STORE["InMemoryStore — runtime store today\nstore.py · MemoryRecord · events · sessions"]
+        REPO["Repositories\nMemoryRepository · EventRepository · SessionRepository"]
+        PG["Postgres + pgvector\nAlembic migration ready\ndb/models.py · docker-compose"]
+        REDIS["Redis / Tair\nsession TTL path\ncompose service ready"]
+        STORE --> REPO
+        PG -. migration target .-> STORE
+        REDIS -. migration target .-> STORE
+    end
+
+    %% ── LLM ───────────────────────────────────────────────────────────────
+    subgraph LLM["LLM layer — OpenAI-compatible client (llm.py)"]
+        direction TB
+        SWITCH{"LLM_PROVIDER"}
+        QWEN["Qwen Cloud / DashScope\nqwen-plus + text-embedding-v3\ncompatible-mode/v1"]
+        OLLAMA["Ollama local\nqwen2.5 family\ndev / offline"]
+        SWITCH -->|qwen · production & demo video| QWEN
+        SWITCH -->|ollama · local only| OLLAMA
+    end
+
+    %% ── Wiring ────────────────────────────────────────────────────────────
+    APIJS -->|"HTTP JSON\n/chat /memories /events /session/new"| MW
+    APIJS -.->|"prod: via /api"| NGX
+    NGX -.-> MW
+    NGX -.-> FE
+
+    REPLY --> SWITCH
+    EXTRACT --> SWITCH
+    CONF2 --> SWITCH
+    CONF1 --> SWITCH
+
+    PROC --> REPO
+    HIST --> REPO
+    RMEM --> REPO
+    REVT --> REPO
+    RMCP --> REPO
+    DECAY --> REPO
+
+    classDef fe fill:#dbeafe,stroke:#1d4ed8,color:#0f172a
+    classDef be fill:#ecfdf5,stroke:#047857,color:#0f172a
+    classDef data fill:#fef3c7,stroke:#b45309,color:#0f172a
+    classDef llm fill:#fce7f3,stroke:#be185d,color:#0f172a
+    classDef edge fill:#f1f5f9,stroke:#64748b,color:#0f172a
+    class FE fe
+    class BE,ORCH,GOV,API be
+    class DATA,STORE,REPO,PG,REDIS data
+    class LLM,QWEN,OLLAMA,SWITCH llm
+    class EDGE,NGX edge
