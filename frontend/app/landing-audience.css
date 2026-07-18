@@ -1,0 +1,120 @@
+.lp-audience {
+  padding: 72px clamp(20px, 4vw, 48px);
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.lp-audience__grid {
+  display: grid;
+  gap: 36px;
+}
+
+@media (min-width: 920px) {
+  .lp-audience__grid {
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: start;
+  }
+}
+
+.lp-audience__list {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.lp-audience__list li {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 14px;
+}
+
+.lp-audience__n {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--cream-deep);
+  color: var(--ink-soft);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.lp-audience__list strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.lp-audience__list p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+}
+
+.lp-audience__panel {
+  position: relative;
+  background: var(--dark);
+  color: var(--cream);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: var(--shadow-soft);
+  min-height: 320px;
+}
+
+.lp-audience__panel .lp-pill {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.lp-audience__panel-kicker {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: rgba(247, 246, 240, 0.55);
+}
+
+.lp-audience__panel-title {
+  margin: 14px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.lp-check {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.lp-check li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(247, 246, 240, 0.85);
+  font-size: 0.92rem;
+}
+
+.lp-check li::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--maroon);
+  box-shadow: inset 0 0 0 3px var(--dark), inset 0 0 0 5px var(--maroon);
+  flex-shrink: 0;
+}
+
+.lp-audience__panel-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--dark-line);
+  font-size: 0.82rem;
+  color: rgba(247, 246, 240, 0.55);
+}
