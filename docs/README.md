@@ -6,8 +6,8 @@ All project documentation lives in this folder.
 
 | Document | Purpose |
 |---|---|
-| [SETUP.md](SETUP.md) | **Local dev, Qwen/Ollama config, Docker, troubleshooting** |
-| [PRODUCTION.md](PRODUCTION.md) | **Deploy to Alibaba Cloud ECS — full production guide** |
+| [SETUP.md](SETUP.md) | **Local only** — Ollama/Qwen env, Docker or manual run, verify |
+| [PRODUCTION.md](PRODUCTION.md) | **Alibaba Cloud production setup** — ECS proof, DashScope, Postgres/Tair, what to submit |
 | [DEMO_GUIDE.md](DEMO_GUIDE.md) | Beat-by-beat script for recording the 3-minute demo video |
 | [SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md) | Devpost requirements mapped to repo artifacts |
 
