@@ -1,0 +1,4 @@
+.site-nav[data-variant="dashboard"] .site-nav__links a[href="/dashboard"] {
+  color: var(--maroon);
+  font-weight: 650;
+}
