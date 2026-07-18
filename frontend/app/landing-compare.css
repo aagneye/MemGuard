@@ -1,0 +1,105 @@
+.lp-compare {
+  padding: 48px clamp(20px, 4vw, 48px) 72px;
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.lp-compare__grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 36px;
+}
+
+@media (min-width: 800px) {
+  .lp-compare__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.lp-compare-card {
+  text-align: left;
+  background: var(--cream-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+.lp-compare-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.lp-compare-card__badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.lp-compare-card__badge--muted {
+  background: var(--cream-deep);
+  color: var(--ink-muted);
+}
+
+.lp-compare-card__badge--accent {
+  background: var(--maroon);
+  color: var(--cream);
+}
+
+.lp-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--maroon);
+}
+
+.lp-live__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--maroon);
+  animation: lpPulse 1.6s ease infinite;
+}
+
+@keyframes lpPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.lp-compare-card__code {
+  margin: 16px 0;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--dark);
+  color: rgba(247, 246, 240, 0.88);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.lp-compare-card__foot {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.88rem;
+}
+
+.lp-compare-card__foot--ok {
+  color: var(--maroon);
+  font-weight: 600;
+}
