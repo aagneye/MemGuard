@@ -1,0 +1,28 @@
+/* MemGuard design tokens — cream surface + maroon accent */
+:root {
+  --cream: #f7f6f0;
+  --cream-deep: #efece4;
+  --cream-card: #fffcf7;
+  --ink: #1a1a1a;
+  --ink-soft: #3d3d38;
+  --ink-muted: #6b6b64;
+  --maroon: #7a2430;
+  --maroon-hover: #5f1b25;
+  --maroon-soft: #f3e6e8;
+  --maroon-glow: rgba(122, 36, 48, 0.18);
+  --dark: #11110b;
+  --dark-elevated: #1a1914;
+  --dark-line: #2a2923;
+  --line: #e4e1d8;
+  --line-strong: #d0ccc0;
+  --white: #ffffff;
+  --success: #7a2430;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-pill: 999px;
+  --font-display: "Fraunces", "Times New Roman", serif;
+  --font-body: "Outfit", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "Consolas", monospace;
+  --shadow-soft: 0 18px 50px rgba(26, 26, 26, 0.06);
+  --nav-height: 72px;
+}
