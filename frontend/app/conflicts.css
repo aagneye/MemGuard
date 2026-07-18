@@ -1,0 +1,18 @@
+.conflict-pair {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+}
+
+@media (min-width: 640px) {
+  .conflict-pair {
+    grid-template-columns: 1fr auto 1fr;
+  }
+}
+
+.conflict-pair__vs {
+  font-family: var(--font-mono);
+  color: var(--maroon);
+  font-weight: 700;
+  text-align: center;
+}
