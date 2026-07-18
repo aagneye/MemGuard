@@ -1,0 +1,4 @@
+.site-nav__brand span:last-child {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
