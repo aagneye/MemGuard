@@ -2,7 +2,9 @@
 
 **Trust-Aware Memory Agent** — scores every memory for trust and provenance, detects conflicts and poisoning, and forgets stale facts. Built for the [Qwen Cloud Global AI Hackathon 2026](https://devpost.com) (Track 1: MemoryAgent).
 
-MIT License · [Full docs](docs/README.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+Open source under the [MIT License](LICENSE) · [Full docs](docs/README.md)
 
 ---
 
