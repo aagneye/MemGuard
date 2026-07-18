@@ -1,0 +1,6 @@
+/* Bind next/font CSS variables into design tokens */
+:root {
+  --font-display: var(--font-fraunces), "Times New Roman", serif;
+  --font-body: var(--font-outfit), "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex), "Consolas", monospace;
+}
