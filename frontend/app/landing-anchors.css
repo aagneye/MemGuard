@@ -1,0 +1,3 @@
+.lp-page section {
+  scroll-margin-top: calc(var(--nav-height) + 12px);
+}
