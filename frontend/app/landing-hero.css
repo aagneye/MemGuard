@@ -1,0 +1,32 @@
+.lp-hero {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: clamp(48px, 10vh, 96px) clamp(20px, 4vw, 48px) 64px;
+  text-align: center;
+}
+
+.lp-hero__title {
+  margin: 0 0 18px;
+  font-size: clamp(2.6rem, 6vw, 4.4rem);
+  line-height: 1.05;
+}
+
+.lp-hero__lede {
+  margin: 0 auto 28px;
+  max-width: 40rem;
+  color: var(--ink-muted);
+  font-size: 1.1rem;
+}
+
+.lp-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.lp-hero__badge {
+  margin: 28px 0 0;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+}
