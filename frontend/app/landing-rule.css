@@ -1,0 +1,6 @@
+.lp-section-rule {
+  height: 1px;
+  border: 0;
+  background: var(--line);
+  margin: 0 clamp(20px, 4vw, 48px);
+}
