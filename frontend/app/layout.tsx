@@ -1,6 +1,26 @@
 import type { Metadata, Viewport } from "next";
+import { Fraunces, Outfit, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-plex",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -28,12 +48,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0f172a",
+  themeColor: "#f7f6f0",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${fraunces.variable} ${outfit.variable} ${plexMono.variable}`}>
       <body>{children}</body>
     </html>
   );
