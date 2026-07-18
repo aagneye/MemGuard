@@ -1,0 +1,24 @@
+.trust-bars {
+  display: grid;
+  gap: 14px;
+}
+
+.trust-bars__row {
+  display: grid;
+  grid-template-columns: 72px 1fr 48px;
+  gap: 12px;
+  align-items: center;
+}
+
+.trust-bars__track {
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--cream-deep);
+  overflow: hidden;
+}
+
+.trust-bars__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--maroon);
+}
