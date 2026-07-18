@@ -1,0 +1,9 @@
+.dash-main > section {
+  animation: mgRise 420ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-main > section {
+    animation: none;
+  }
+}
