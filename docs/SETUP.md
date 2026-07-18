@@ -186,6 +186,8 @@ Not required for the public `/demo`. Optional steps remain under the dashboard r
 | Symptom | Fix |
 |---|---|
 | `Python was not found… Microsoft Store` | Store alias stole `python`. Use full path to `Python312\python.exe` (see Step 3), or disable App execution aliases |
+| `WinError 32` / file in use during `pip install` | Stop other Python/uvicorn windows first (`Ctrl+C`), then re-run install |
+| `No module named 'fastapi'` | Install failed or incomplete — re-run the Step 3 `pip install` line, then start uvicorn |
 | Chat: “could not reach the model” | Start `ollama serve`; match `OLLAMA_MODEL` to `ollama list` |
 | Ollama `404` on `/v1/chat/completions` | Wrong/missing model name in `.env` |
 | Frontend cannot reach API | `NEXT_PUBLIC_API_BASE=http://localhost:8000` |
