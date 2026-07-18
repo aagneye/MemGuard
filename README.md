@@ -6,6 +6,18 @@ MIT License · [Full docs](docs/README.md)
 
 ---
 
+## Architecture
+
+How **Qwen Cloud** connects to the **FastAPI backend**, **data layer**, and **Next.js frontend**:
+
+![MemGuard System Architecture](docs/architecture-diagram.png)
+
+**Three Qwen Cloud calls per chat turn:** (1) chat reply · (2) JSON fact extraction · (3) conflict adjudication — plus `text-embedding-v3` for vector Stage 1. Locally, `LLM_PROVIDER=ollama` swaps in a Qwen-family model without changing the rest of the pipeline.
+
+Deep dive (code map + Mermaid sources): [docs/ARCHITECTURE_DIAGRAM.md](docs/ARCHITECTURE_DIAGRAM.md) · [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+---
+
 ## Run locally
 
 ### Option A — Docker (easiest)
