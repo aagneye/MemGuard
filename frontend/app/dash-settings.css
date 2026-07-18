@@ -1,0 +1,19 @@
+.dash-field {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.dash-field select {
+  max-width: 280px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line-strong);
+  background: var(--cream);
+}
+
+.dash-field--row {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+}
