@@ -1,0 +1,9 @@
+export { default as LandingHero } from "./LandingHero";
+export { default as LandingCompare } from "./LandingCompare";
+export { default as LandingLoop } from "./LandingLoop";
+export { default as LandingDarkFeatures } from "./LandingDarkFeatures";
+export { default as LandingAudience } from "./LandingAudience";
+export { default as LandingProof } from "./LandingProof";
+export { default as LandingResults } from "./LandingResults";
+export { default as LandingCta } from "./LandingCta";
+export { default as LandingFooter } from "./LandingFooter";
