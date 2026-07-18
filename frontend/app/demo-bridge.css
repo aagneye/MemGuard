@@ -1,0 +1,27 @@
+/* Soft bridge so /demo sits on cream chrome */
+.demo-shell {
+  min-height: 100vh;
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.demo-shell .topbar {
+  background: var(--cream-card);
+  border-bottom: 1px solid var(--line);
+}
+
+.launch-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 22px;
+  border-radius: var(--radius-pill);
+  background: var(--maroon);
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.launch-button:hover {
+  background: var(--maroon-hover);
+}
