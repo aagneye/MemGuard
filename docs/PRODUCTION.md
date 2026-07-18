@@ -1,335 +1,317 @@
-# MemGuard — Production Deployment Guide
+# MemGuard — Production Setup (Alibaba Cloud)
 
-End-to-end guide to take MemGuard from your working local setup to a **public, Qwen-backed production deployment** on Alibaba Cloud ECS.
+Clear guide to **host MemGuard on Alibaba Cloud** for the hackathon.
 
-**You already have local working?** Skip to [§4 Deploy to Alibaba Cloud ECS](#4-deploy-to-alibaba-cloud-ecs).
-
-Related docs:
-- Local dev: [SETUP.md](SETUP.md)
-- ECS detail / submission proof: [../infra/alibaba-cloud/ecs-setup.md](../infra/alibaba-cloud/ecs-setup.md)
-- Managed Postgres (optional): [../infra/alibaba-cloud/rds-setup.md](../infra/alibaba-cloud/rds-setup.md)
-- Demo video script: [DEMO_GUIDE.md](DEMO_GUIDE.md)
+This doc is your **setup for production**. Local machine steps live in **[SETUP.md](SETUP.md)**.
 
 ---
 
-## 1. What production looks like
+## Why this doc exists (hackathon “What to Submit”)
 
-```
-Internet
-    │
-    ▼
-┌─────────────────────────────────────────┐
-│  Alibaba Cloud ECS (Ubuntu 22.04)       │
-│                                         │
-│  Nginx :80  ──► frontend :3000 (Next.js)│
-│            └──► backend  :8000 (FastAPI)│
-│                                         │
-│  postgres (pgvector)  redis             │
-└─────────────────────────────────────────┘
-    │
-    ▼
-DashScope (Qwen Cloud) — chat, extraction, adjudication, embeddings
-```
-
-| URL (after deploy) | What it serves |
+| Submission item | Where MemGuard covers it |
 |---|---|
-| `http://<ECS_IP>/` | Landing page |
-| `http://<ECS_IP>/demo` | Main demo (judged screen) |
-| `http://<ECS_IP>/docs` | API documentation |
-| `http://<ECS_IP>/api/*` | Backend API (via Nginx proxy) |
+| Public open-source repo + license in About | Root [`LICENSE`](../LICENSE) (MIT) — set repo to **Public** on GitHub |
+| **Proof of Alibaba Cloud deployment** | This guide + [`infra/alibaba-cloud/ecs-setup.md`](../infra/alibaba-cloud/ecs-setup.md) (link this file on Devpost) |
+| Architecture diagram | [`architecture-diagram.png`](architecture-diagram.png) in README |
+| ~3 min demo video | Record against the **ECS public URL**, not localhost — [DEMO_GUIDE.md](DEMO_GUIDE.md) |
+| Text description + Track 1 | [ARCHITECTURE.md](ARCHITECTURE.md) · Track = **MemoryAgent** |
 
 ---
 
-## 2. Pre-deploy checklist
+## Architecture you are hosting
 
-Before you touch the cloud:
-
-- [ ] Local demo works at `http://localhost:3000/demo` (chat + Memory Inspector)
-- [ ] `python scripts/replay_demo_beats.py` passes all 5 beats (backend on `:8000`)
-- [ ] Qwen Cloud (DashScope) API key obtained and tested
-- [ ] GitHub repo is **public** with MIT license visible
-- [ ] `.env` values ready (see §3) — **never commit real keys**
-
-**Hackathon requirement:** Production demo and video must use **`LLM_PROVIDER=qwen`**, not Ollama.
-
----
-
-## 3. Production `.env`
-
-On the server, create `/opt/MemGuard/.env` from `.env.example`:
-
-```env
-# ── LLM (required for production) ─────────────────────────────────────────
-LLM_PROVIDER=qwen
-QWEN_API_KEY=sk-your-dashscope-key-here
-QWEN_BASE_URL=https://dashscope-intl.aliyuncs.com/compatible-mode/v1
-QWEN_CHAT_MODEL=qwen-plus
-
-# ── Frontend (CRITICAL — baked in at Next.js build time) ─────────────────
-# Use your ECS public IP or domain. Nginx proxies /api → backend.
-NEXT_PUBLIC_API_BASE=http://YOUR_ECS_PUBLIC_IP/api
-
-# ── CORS ─────────────────────────────────────────────────────────────────
-CORS_ORIGINS=http://YOUR_ECS_PUBLIC_IP,https://YOUR_DOMAIN_IF_ANY
-
-# ── Database (container names match docker-compose service names) ────────
-DATABASE_URL=postgresql+asyncpg://memguard:memguard@postgres:5432/memguard
-REDIS_URL=redis://redis:6379/0
-
-# ── Governance tuning ────────────────────────────────────────────────────
-DEMO_TIME_SCALE=1.0
-RATE_LIMIT_RPM=60
-SIMILARITY_THRESHOLD=0.8
-SESSION_TTL_SECONDS=1800
-
-# ── Server ───────────────────────────────────────────────────────────────
-BACKEND_HOST=0.0.0.0
-BACKEND_PORT=8000
+```
+Browser
+   │
+   ▼
+Alibaba Cloud ECS  ── Nginx ──► Next.js frontend (:3000)
+                     │
+                     └── /api ──► FastAPI backend (:8000)
+                                      │
+                    ┌─────────────────┼─────────────────┐
+                    ▼                 ▼                 ▼
+            Postgres+pgvector    Redis / Tair      Qwen Cloud
+            (long-term memory)   (session TTL)     (DashScope)
 ```
 
-Replace `YOUR_ECS_PUBLIC_IP` with your Elastic IP after provisioning.
+| Layer | Production choice | Role |
+|---|---|---|
+| **Backend** | FastAPI on **Alibaba Cloud ECS** (or Function Compute stretch) | Deployment proof artifact |
+| **Reasoning + fact extraction** | **Qwen** via **DashScope** OpenAI-compatible API | Chat reply, JSON extract, conflict adjudicate, embeddings |
+| **Memory store** | **Postgres + pgvector** and/or **Redis / Tair** | Vectors + fact table fields: trust, provenance, TTL |
+| **Governance** | Conflict detector + decay (check-on-read / demo scale) | Rubric “algorithmic innovation” |
 
-**Security:** Change the default Postgres password (`memguard`) if the database port is ever exposed. For the default compose setup, Postgres is internal to Docker only.
+Code entry points: `backend/app/routes_chat.py`, `service_memory.py`, `llm.py`, `llm_extract.py`, `llm_adjudicate.py`, `service_conflict.py`, `service_decay.py`.
 
 ---
 
-## 4. Deploy to Alibaba Cloud ECS
+## Before you start
 
-### 4.1 Provision the server
+Do these on your laptop first ([SETUP.md](SETUP.md)):
 
-1. [Alibaba Cloud Console](https://www.alibabacloud.com/) → **ECS** → **Create Instance**
-2. **Region:** pick one close to DashScope (e.g. `ap-southeast-1`)
-3. **Image:** Ubuntu 22.04 LTS 64-bit
-4. **Instance type:** 2 vCPU / 4 GB RAM minimum (e.g. `ecs.g7.large`)
-5. **Storage:** 40 GB SSD
-6. **Elastic IP (EIP):** allocate and bind a static public IP
-7. **Security group inbound rules:**
+1. Local `/demo` works.
+2. GitHub repo is **public** with MIT visible in About.
+3. You have a **DashScope (Qwen Cloud) API key**.
+4. You have an **Alibaba Cloud** account (same region as DashScope if possible, e.g. `ap-southeast-1`).
 
-| Port | Source | Purpose |
+**Rule for submission:** production and the demo video must use `LLM_PROVIDER=qwen` — **not** Ollama.
+
+---
+
+## Part A — Qwen Cloud (DashScope) setup
+
+Judges expect **Qwen Cloud** for reasoning and fact extraction.
+
+### A1. Create API key
+
+1. Open [DashScope console](https://dashscope.aliyun.com/).
+2. Create an API key (use hackathon credits if available).
+3. Keep the key only in server `.env` — never commit it.
+
+### A2. Compatible-mode endpoint
+
+MemGuard uses the OpenAI-compatible client (`backend/app/llm.py`):
+
+```text
+https://dashscope-intl.aliyuncs.com/compatible-mode/v1
+```
+
+Models used in production:
+
+| Call | Model / API | Module |
+|---|---|---|
+| Chat reply | `qwen-plus` | `routes_chat.py` |
+| Fact extraction (JSON) | `qwen-plus` | `llm_extract.py` |
+| Conflict adjudication | `qwen-plus` | `llm_adjudicate.py` |
+| Embeddings | `text-embedding-v3` | `llm_embed.py` |
+
+### A3. Sanity-check Qwen before deploy
+
+```bash
+curl https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_QWEN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"model\":\"qwen-plus\",\"messages\":[{\"role\":\"user\",\"content\":\"say hi\"}]}"
+```
+
+If this fails, fix the key/region before touching ECS.
+
+---
+
+## Part B — Alibaba Cloud ECS (backend proof of deployment)
+
+This is the **recommended** path and the file you link as deployment proof:  
+**[`infra/alibaba-cloud/ecs-setup.md`](../infra/alibaba-cloud/ecs-setup.md)**
+
+### B1. Create ECS
+
+1. Alibaba Cloud Console → **ECS** → Create Instance  
+2. OS: **Ubuntu 22.04 LTS**  
+3. Size: **2 vCPU / 4 GB RAM** minimum, 40 GB disk  
+4. Bind an **Elastic IP (EIP)**  
+5. Security group inbound:
+
+| Port | Who | Why |
 |---|---|---|
 | 22 | Your IP only | SSH |
-| 80 | 0.0.0.0/0 | HTTP (Nginx) |
-| 443 | 0.0.0.0/0 | HTTPS (optional, after TLS setup) |
-| 8000 | 0.0.0.0/0 | Temporary — for deployment proof video only; close after |
+| 80 | Everyone | Nginx → demo site |
+| 8000 | Everyone *(temporary)* | Direct health check for proof video — close after |
 
-### 4.2 Install Docker on ECS
+### B2. Install Docker on the instance
 
 ```bash
 ssh root@YOUR_ECS_PUBLIC_IP
 
 curl -fsSL https://get.docker.com | sh
 apt-get install -y docker-compose-plugin git curl
-systemctl enable docker
-systemctl start docker
+systemctl enable docker && systemctl start docker
 ```
 
-### 4.3 Clone and configure
+### B3. Clone MemGuard and write production `.env`
 
 ```bash
 cd /opt
 git clone https://github.com/aagneye/MemGuard.git
 cd MemGuard
 cp .env.example .env
-nano .env   # fill in QWEN_API_KEY, NEXT_PUBLIC_API_BASE, CORS_ORIGINS
+nano .env
 ```
 
-Set `NEXT_PUBLIC_API_BASE=http://YOUR_ECS_PUBLIC_IP/api` **before** building — Next.js embeds this at build time.
+**Production `.env` (copy and replace placeholders):**
 
-### 4.4 Build and start (production compose)
+```env
+# ── Qwen Cloud (required for submission) ───────────────────────────────────
+LLM_PROVIDER=qwen
+QWEN_API_KEY=sk-your-real-dashscope-key
+QWEN_BASE_URL=https://dashscope-intl.aliyuncs.com/compatible-mode/v1
+QWEN_CHAT_MODEL=qwen-plus
+
+# ── Frontend build-time API base (CRITICAL) ────────────────────────────────
+# Nginx proxies /api → FastAPI. Rebuild frontend if you change this.
+NEXT_PUBLIC_API_BASE=http://YOUR_ECS_PUBLIC_IP/api
+
+# ── CORS ───────────────────────────────────────────────────────────────────
+CORS_ORIGINS=http://YOUR_ECS_PUBLIC_IP
+
+# ── Memory stores on the ECS docker network ────────────────────────────────
+# Postgres + pgvector (long-term / vectors)
+DATABASE_URL=postgresql+asyncpg://memguard:CHANGE_ME@postgres:5432/memguard
+# Redis (session TTL) — swap host for Tair endpoint if using managed Tair
+REDIS_URL=redis://redis:6379/0
+
+# ── Governance ─────────────────────────────────────────────────────────────
+SIMILARITY_THRESHOLD=0.8
+DEMO_TIME_SCALE=1.0
+SESSION_TTL_SECONDS=1800
+RATE_LIMIT_RPM=60
+
+BACKEND_HOST=0.0.0.0
+BACKEND_PORT=8000
+```
+
+### B4. Start the production stack
 
 ```bash
 cd /opt/MemGuard/infra
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
-This starts:
-- **postgres** (pgvector), **redis**, **backend** (2 workers), **frontend** (production build), **nginx** (port 80)
+Starts: **nginx**, **frontend**, **backend**, **postgres (pgvector)**, **redis**.
 
-First build takes 5–10 minutes (frontend `npm run build`).
-
-### 4.5 Enable pgvector extension
+Enable the vector extension:
 
 ```bash
-cd /opt/MemGuard/infra
 docker compose exec postgres psql -U memguard -d memguard \
   -c "CREATE EXTENSION IF NOT EXISTS vector;"
 ```
 
-> **Note:** The app currently uses an in-memory store for memories. Postgres/Redis are running and ready for the persistence migration described in [FUTURE_WORK.md](FUTURE_WORK.md). The demo works without additional DB wiring.
+First build can take 5–10 minutes.
 
-### 4.6 Watch logs during first boot
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
-```
-
-Wait until you see backend `MemGuard starting` and frontend `Ready`.
-
----
-
-## 5. Verify production
-
-Run these on the ECS box or from your laptop:
+### B5. Verify (do this on camera for deployment proof)
 
 ```bash
-# All containers healthy
 docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
-
-# Backend health
-curl http://YOUR_ECS_PUBLIC_IP/api/health
-# or directly: curl http://YOUR_ECS_PUBLIC_IP:8000/health
-
-# Expected: {"ok":true,"version":"0.3.0","provider":"qwen",...}
-
-# Seed demo data (from ECS host, with Python + httpx installed)
-pip install httpx
-python scripts/seed_demo_data.py --base-url http://YOUR_ECS_PUBLIC_IP/api
-
-# Verify all 5 beats
-python scripts/replay_demo_beats.py --base-url http://YOUR_ECS_PUBLIC_IP/api
+curl http://localhost:8000/health
+# Expect: "ok": true, "provider": "qwen"
 ```
 
-**Browser checks:**
+From your laptop:
 
-| URL | Expected |
+| URL | Expect |
 |---|---|
-| `http://YOUR_ECS_PUBLIC_IP/` | Landing page with "Launch Demo" |
-| `http://YOUR_ECS_PUBLIC_IP/demo` | Chat + Memory Inspector (your screenshot) |
-| `http://YOUR_ECS_PUBLIC_IP/docs` | FastAPI Swagger UI |
+| `http://YOUR_ECS_PUBLIC_IP/` | Landing |
+| `http://YOUR_ECS_PUBLIC_IP/demo` | Chat + Memory Inspector |
+| `http://YOUR_ECS_PUBLIC_IP/api/health` | Health JSON with `"provider":"qwen"` |
+| `http://YOUR_ECS_PUBLIC_IP/docs` | OpenAPI |
 
-If the demo loads but chat fails with a network error, `NEXT_PUBLIC_API_BASE` is wrong — it must be `http://YOUR_ECS_PUBLIC_IP/api` and you must **rebuild** the frontend:
+If UI loads but chat fails: fix `NEXT_PUBLIC_API_BASE`, then:
 
 ```bash
-cd /opt/MemGuard/infra
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build frontend
 ```
 
 ---
 
-## 6. Record deployment proof (hackathon submission)
+## Part C — Memory store: Postgres + pgvector and Redis / Tair
 
-Record a **short separate video** (not the main demo) showing:
+### C1. Default on ECS (containers)
 
-1. SSH into ECS: `ssh root@YOUR_ECS_PUBLIC_IP`
-2. `docker compose ps` — all services `running`
-3. `curl http://localhost:8000/health` — JSON with `"provider":"qwen"`
-4. Browser on the ECS public IP showing `/demo` loading
+`infra/docker-compose.yml` already runs:
 
-Link this video + [ecs-setup.md](../infra/alibaba-cloud/ecs-setup.md) in your Devpost submission.
+- **Postgres** image `pgvector/pgvector:pg16` — long-term facts + vector column (see `backend/alembic/`, `backend/app/db/models.py`)
+- **Redis** — session-style TTL path (`REDIS_URL`)
+
+Fact fields the governance layer cares about: **trust tier**, **source/provenance**, **status**, **TTL / last_confirmed_at**, **conflicts_with**.
+
+> Runtime note: the demo may still use the fast **InMemoryStore** until the Postgres repository is fully wired ([FUTURE_WORK.md](FUTURE_WORK.md)). For submission, still **run** Postgres + Redis on ECS so the deployment topology matches the architecture (and record `docker compose ps` showing those services).
+
+### C2. Stronger Alibaba proof — managed services
+
+| Service | Guide | What to set in `.env` |
+|---|---|---|
+| **RDS PostgreSQL** + `vector` | [`infra/alibaba-cloud/rds-setup.md`](../infra/alibaba-cloud/rds-setup.md) | `DATABASE_URL=postgresql+asyncpg://...@<rds-endpoint>:5432/memguard` |
+| **Tair / Redis** | Alibaba Cloud Tair console | `REDIS_URL=redis://:<password>@<tair-endpoint>:6379/0` |
+
+After pointing `.env` at RDS/Tair, remove or stop the matching container service and restart the backend.
 
 ---
 
-## 7. Record the main demo video
+## Part D — Governance module (what to show judges)
 
-Follow [DEMO_GUIDE.md](DEMO_GUIDE.md) beat-by-beat against the **production URL** (`http://YOUR_ECS_PUBLIC_IP/demo`), not localhost.
+Hosted on the same FastAPI process — no extra service to start.
 
-Before recording:
+| Capability | What it does | Code |
+|---|---|---|
+| Trust scorer | `user_stated` → HIGH, `tool_inferred` → MED, `document_extracted` → LOW | `service_trust.py` |
+| Poisoning guard | Sensitive doc claims → `flagged_poisoning` | `service_poison.py` |
+| Conflict detector | Stage 1 keyword/vector · Stage 2 Qwen adjudicate | `service_conflict.py`, `llm_adjudicate.py` |
+| Decay | TTL + `DEMO_TIME_SCALE`, check-on-read | `service_decay.py` |
+
+Visible in the UI: Memory Inspector + Governance Log (`/demo`).
+
+---
+
+## Part E — Optional: Function Compute
+
+ECS is enough for the hackathon. If you prefer serverless:
+
+1. Package the FastAPI app as a Function Compute HTTP function (custom runtime / container).
+2. Still call DashScope with `LLM_PROVIDER=qwen`.
+3. Attach RDS + Tair via VPC.
+4. Document the Function Compute console URL + this repo’s compose/ECS file as alternate proof.
+
+Prefer **ECS + docker compose** unless you already know Function Compute.
+
+---
+
+## Part F — What to put on the submission form
+
+1. **Code repository URL** — `https://github.com/aagneye/MemGuard` (Public + MIT in About).  
+2. **Proof of Alibaba Cloud deployment** — link to  
+   `https://github.com/aagneye/MemGuard/blob/master/infra/alibaba-cloud/ecs-setup.md`  
+   *(and/or this file `docs/PRODUCTION.md`)* plus a short video of `docker compose ps` + `curl .../health` on ECS.  
+3. **Architecture diagram** — `docs/architecture-diagram.png` (already in README).  
+4. **Demo video (~3 min)** — record on `http://YOUR_ECS_PUBLIC_IP/demo` with Qwen provider.  
+5. **Text description** — pitch from [ARCHITECTURE.md](ARCHITECTURE.md).  
+6. **Track** — **Track 1: MemoryAgent**.  
+7. **Optional blog** — for Blog Post Prize.
+
+---
+
+## Day-2 operations
 
 ```bash
-python scripts/seed_demo_data.py --base-url http://YOUR_ECS_PUBLIC_IP/api
-python scripts/replay_demo_beats.py --base-url http://YOUR_ECS_PUBLIC_IP/api
-```
-
-Use **Alice** in the demo user dropdown. Narrate trust tiers, poisoning, conflict resolution, and the governance log.
-
----
-
-## 8. Optional: custom domain + HTTPS
-
-1. Point your domain's **A record** to the ECS Elastic IP.
-2. Update `.env`:
-   ```env
-   NEXT_PUBLIC_API_BASE=https://yourdomain.com/api
-   CORS_ORIGINS=https://yourdomain.com
-   ```
-3. Rebuild frontend: `docker compose ... up -d --build frontend`
-4. Install Certbot on ECS and obtain a certificate, or use Alibaba Cloud SSL.
-5. Update `infra/nginx/memguard.conf` to listen on 443 with SSL cert paths.
-
----
-
-## 9. Optional: managed RDS instead of container Postgres
-
-For stronger "Alibaba Cloud services" proof, use RDS:
-
-See [rds-setup.md](../infra/alibaba-cloud/rds-setup.md).
-
-Summary: create RDS PostgreSQL 16 → enable `vector` extension → update `DATABASE_URL` in `.env` → remove `postgres` service from compose → redeploy.
-
----
-
-## 10. Day-2 operations
-
-### Update to latest code
-
-```bash
-cd /opt/MemGuard
-git pull
+# Update code
+cd /opt/MemGuard && git pull
 cd infra
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-```
 
-### View logs
-
-```bash
+# Logs
 docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f backend
-docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f frontend
-docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f nginx
-```
 
-### Restart a single service
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml restart backend
-```
-
-### Reset demo state (before a live presentation)
-
-```bash
+# Reset demo memories before a live run
 curl -X POST http://YOUR_ECS_PUBLIC_IP/api/demo/reset
 ```
 
-Or click **Reset Demo** in the UI.
+---
 
-### Stop everything
+## Troubleshooting (production)
+
+| Problem | Fix |
+|---|---|
+| Health shows `"provider":"ollama"` | Set `LLM_PROVIDER=qwen` + `QWEN_API_KEY`, restart backend |
+| Chat empty / DashScope errors | Re-run Part A curl; check region URL |
+| UI OK, API unreachable | `NEXT_PUBLIC_API_BASE=http://IP/api` then rebuild frontend |
+| CORS blocked | Add public URL to `CORS_ORIGINS` |
+| Out of memory on build | Use ≥4 GB ECS, or build images elsewhere |
+| Postgres / Redis not listed in `docker compose ps` | Re-run Part B4 from `infra/` |
+
+---
+
+## One-page deploy card
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml down
-```
-
----
-
-## 11. Troubleshooting
-
-| Problem | Cause | Fix |
-|---|---|---|
-| Demo UI loads, chat says "Backend unreachable" | Wrong `NEXT_PUBLIC_API_BASE` | Set to `http://IP/api`, rebuild frontend |
-| CORS error in browser console | Origin not in `CORS_ORIGINS` | Add your public URL to `.env`, restart backend |
-| `"provider":"ollama"` in health | Forgot to set Qwen | `LLM_PROVIDER=qwen` + `QWEN_API_KEY` in `.env`, restart backend |
-| Qwen API errors | Invalid key or wrong region URL | Test with curl (see [SETUP.md](SETUP.md) §5) |
-| `docker compose` build fails on frontend | Out of memory on small ECS | Use 4 GB+ RAM instance; or build frontend locally and push image |
-| Port 80 connection refused | Nginx not started | `docker compose ps`; check nginx logs |
-| Memories don't persist after restart | In-memory store (by design) | See [FUTURE_WORK.md](FUTURE_WORK.md) for Postgres wiring |
-
----
-
-## 12. Submission checklist
-
-Walk [SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md) before submitting to Devpost:
-
-- [ ] Public GitHub repo + MIT license
-- [ ] Production URL works (`/demo`)
-- [ ] Alibaba Cloud deployment proof video
-- [ ] ~3 min demo video (5 beats)
-- [ ] Architecture diagram PNG in README
-- [ ] Track 1 — MemoryAgent declared
-
----
-
-## Quick reference — one-page deploy
-
-```bash
-# On ECS (Ubuntu 22.04, Docker installed)
+ssh root@YOUR_ECS_PUBLIC_IP
 cd /opt && git clone https://github.com/aagneye/MemGuard.git && cd MemGuard
 cp .env.example .env
 # Edit: LLM_PROVIDER=qwen, QWEN_API_KEY, NEXT_PUBLIC_API_BASE=http://IP/api, CORS_ORIGINS
@@ -337,7 +319,9 @@ cp .env.example .env
 cd infra
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 docker compose exec postgres psql -U memguard -d memguard -c "CREATE EXTENSION IF NOT EXISTS vector;"
-
-curl http://localhost:8000/health
-# Open http://YOUR_ECS_PUBLIC_IP/demo in browser
+curl http://localhost:8000/health   # provider must be qwen
+# Open http://YOUR_ECS_PUBLIC_IP/demo
 ```
+
+More ECS detail (submission proof file): [`infra/alibaba-cloud/ecs-setup.md`](../infra/alibaba-cloud/ecs-setup.md)  
+Local development only: [`SETUP.md`](SETUP.md)
