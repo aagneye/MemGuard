@@ -1,11 +1,25 @@
-import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import SiteNavbar from "../../components/nav/SiteNavbar";
+import { ReactNode } from "react";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Demo",
-  description: "MemGuard live demo — chat with a trust-aware memory agent that scores, conflicts, and forgets.",
+  description: "MemGuard live console — chat, memory inspector, governance log.",
 };
 
+const DEMO_LINKS = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/#compare", label: "Compare" },
+  { href: "/#proof", label: "Proof" },
+];
+
 export default function DemoLayout({ children }: { children: ReactNode }) {
-  return children;
+  return (
+    <div className="demo-layout">
+      <SiteNavbar
+        variant="dashboard"
+        links={DEMO_LINKS}
+      />
+      {children}
+    </div>
+  );
 }
