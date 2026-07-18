@@ -16,6 +16,8 @@ All project documentation lives in this folder.
 | Document | Purpose |
 |---|---|
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Full system design, data model, governance logic, API contract |
+| [ARCHITECTURE_DIAGRAM.md](ARCHITECTURE_DIAGRAM.md) | **Submission diagram** — PNG + Mermaid + code map to Qwen / backend / data / frontend |
+| [architecture-diagram.png](architecture-diagram.png) | Architecture PNG for README / Devpost |
 | [FRONTEND_SPEC.md](FRONTEND_SPEC.md) | Demo screens (Chat, Memory Inspector, Landing) and UI contract |
 | [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) | Monorepo layout and file map |
 | [BUILD_PLAN.md](BUILD_PLAN.md) | Original day-by-day hackathon build order |
