@@ -1,0 +1,48 @@
+.lp-loop {
+  padding: 56px clamp(20px, 4vw, 48px);
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.lp-loop__rail {
+  display: grid;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--cream-card);
+}
+
+@media (min-width: 900px) {
+  .lp-loop__rail {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .lp-loop__cell:not(:last-child) {
+    border-right: 1px solid var(--line);
+  }
+}
+
+.lp-loop__cell {
+  padding: 22px;
+}
+
+.lp-loop__cell h3 {
+  margin: 8px 0 10px;
+  font-size: 1.15rem;
+  font-family: var(--font-body);
+}
+
+.lp-loop__cell p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.92rem;
+}
+
+.lp-loop__meta {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 600;
+}
