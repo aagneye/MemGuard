@@ -7,3 +7,4 @@ export { default as LandingProof } from "./LandingProof";
 export { default as LandingResults } from "./LandingResults";
 export { default as LandingCta } from "./LandingCta";
 export { default as LandingFooter } from "./LandingFooter";
+export { default as LandingRule } from "./LandingRule";
