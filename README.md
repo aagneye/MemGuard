@@ -110,8 +110,8 @@ Or from repo root: `make test`
 
 | Doc | What it covers |
 |---|---|
-| [docs/SETUP.md](docs/SETUP.md) | Full setup: Docker, Qwen, Ollama, troubleshooting |
-| [docs/PRODUCTION.md](docs/PRODUCTION.md) | **Deploy to production (Alibaba Cloud ECS)** |
+| [docs/SETUP.md](docs/SETUP.md) | Local setup (Ollama / Docker / verify) |
+| [docs/PRODUCTION.md](docs/PRODUCTION.md) | **Alibaba Cloud production setup** (ECS + DashScope + proof) |
 | [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md) | Beat-by-beat demo video script |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design and governance logic |
 | [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md) | Hackathon submission requirements |
