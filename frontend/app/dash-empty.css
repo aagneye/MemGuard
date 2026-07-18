@@ -1,0 +1,8 @@
+.dash-empty {
+  padding: 28px;
+  text-align: center;
+  color: var(--ink-muted);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--cream-card);
+}
